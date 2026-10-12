@@ -59,6 +59,7 @@ export function PartnerStrip({ game, left }: { game: Game; left: number }) {
         </div>
         <div
           className="partner-bar"
+          data-reward-target="xp"
           role="progressbar"
           aria-label={`Level ${game.level} progress`}
           aria-valuemin={0}

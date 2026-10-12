@@ -9,6 +9,7 @@ import { habitIdFor } from '../config/habits'
 import type { Ticks } from '../lib/store'
 import type { ReviewItem } from '../lib/monthReview'
 import { sundayTickId, type SundayTask } from '../lib/sundayTasks'
+import { POKEDEX_URL } from '../lib/game'
 
 export interface WeeklyCtx {
   reviews: ReviewItem[]
@@ -57,11 +58,16 @@ export function MonthReviews({
             >
               <span
                 aria-hidden
-                className={`flex h-7 w-7 shrink-0 items-center justify-center border-[3px] border-black text-base font-bold ${
+                className={`relative flex h-9 w-9 shrink-0 items-center justify-center border-[3px] border-black text-base font-bold ${
                   done ? 'bg-white' : 'bg-neo-yellow'
                 }`}
               >
-                {done ? '✓' : ''}
+                {POKEDEX_URL ? (
+                  <img src={`${POKEDEX_URL}/sprites/items/comet-shard.png`} alt="" width={28} height={28} style={{ imageRendering: 'pixelated' }} className={done ? 'opacity-40' : ''} />
+                ) : (
+                  <span>◆</span>
+                )}
+                {done && <span className="absolute -bottom-1.5 -right-1.5 flex h-4 w-4 items-center justify-center border-2 border-black bg-neo-green text-[10px] leading-none">✓</span>}
               </span>
               <span className="min-w-0 flex-1">
                 <span className={`block text-base font-bold ${done ? 'line-through opacity-80' : ''}`}>
@@ -70,7 +76,7 @@ export function MonthReviews({
                 <span className="block text-[11px] font-bold leading-snug text-black/60">
                   {done
                     ? 'Reviewed — tap to undo'
-                    : 'Look over the graph, then tap to close the month. Stays here until you do.'}
+                    : 'Look over the graph, then tap to close the month. Pays a Comet Shard. Stays here until you do.'}
                 </span>
               </span>
             </button>

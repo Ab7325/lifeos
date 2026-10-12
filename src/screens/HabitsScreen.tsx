@@ -6,7 +6,8 @@
 // Habits you switch off drop into the Shelf below, still ordered, one tap from
 // coming back.
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Reorder, motion, useDragControls } from 'framer-motion'
+import { AnimatePresence, Reorder, motion, useDragControls } from 'framer-motion'
+import { flyReward } from '../lib/flyReward'
 import { TIERS, TIER_XP, domainOf, type Habit, type Tier } from '../config/habits'
 import type { Ticks } from '../lib/store'
 import { PartnerStrip } from '../components/PartnerStrip'
@@ -280,6 +281,9 @@ function ChecklistRow({
       // position-only: the default also animates size, which scale-squashes the
       // row whenever its editor panel opens.
       layout="position"
+      data-habit-row={habit.id}
+      // leaving after its 10 seconds: shrinks away while its XP flies to the bar
+      exit={{ opacity: 0, scale: 0.9, height: 0, marginTop: 0, transition: { duration: 0.28 } }}
       className="list-none"
       // Springy neighbours: rows shove each other aside while you drag.
       transition={{ type: 'spring', stiffness: 600, damping: 42 }}
@@ -619,6 +623,8 @@ export function HabitsScreen({
   // the clock the hiding is judged against; moved on by a timer for the next tick to expire
   const [now, setNow] = useState(() => Date.now())
   const [showDone, setShowDone] = useState(false)
+  // arranging shows everything, so the order of hidden rows is never lost
+  const showAll = showDone || arranging
   useEffect(() => {
     let soonest = Infinity
     for (const at of Object.values(todayRaw ?? {})) {
@@ -626,11 +632,23 @@ export function HabitsScreen({
       if (t > Date.now() && t < soonest) soonest = t
     }
     if (soonest === Infinity) return
-    const id = window.setTimeout(() => setNow(Date.now()), soonest - Date.now() + 20)
+    const id = window.setTimeout(() => {
+      // whatever expires now flies its XP to the partner's bar as the row leaves
+      if (!showAll) {
+        const t0 = Date.now() + 25
+        for (const h of live) {
+          const at = todayRaw?.[h.id]
+          if (!at || Date.parse(at) + DONE_HIDE_MS > t0) continue
+          const row = document.querySelector(`[data-habit-row="${CSS.escape(h.id)}"]`)
+          if (row) flyReward(row, `+${tierXp(h.tier)}`)
+        }
+      }
+      setNow(Date.now())
+    }, soonest - Date.now() + 20)
     return () => window.clearTimeout(id)
     // `now` re-arms the timer for the next tick in line once one has expired;
     // without it only the first tick ever disappeared.
-  }, [todayRaw, now])
+  }, [todayRaw, now, live, showAll])
   // a tick older than DONE_HIDE_MS (or one with no usable time) is done and out of the way
   const isHidden = (id: string): boolean => {
     const at = todayTicks[id]
@@ -638,8 +656,6 @@ export function HabitsScreen({
     const t = Date.parse(at)
     return Number.isNaN(t) || now - t >= DONE_HIDE_MS
   }
-  // arranging shows everything, so the order of hidden rows is never lost
-  const showAll = showDone || arranging
   const shown = showAll ? live : live.filter((h) => !isHidden(h.id))
   const doneHidden = live.filter((h) => isHidden(h.id)).length
 
@@ -703,6 +719,7 @@ export function HabitsScreen({
         </div>
       ) : (
         <Reorder.Group axis="y" values={shown} onReorder={commit} className="space-y-2">
+          <AnimatePresence initial={false}>
           {shown.map((h, i) => (
             <ChecklistRow
               key={h.id}
@@ -718,6 +735,7 @@ export function HabitsScreen({
               linked={linked}
             />
           ))}
+          </AnimatePresence>
         </Reorder.Group>
       )}
       {!arranging && !showDone && doneHidden > 0 && (
