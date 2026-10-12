@@ -108,6 +108,10 @@ export function momentText(m: Moment): { title: string; line: string; form?: str
       return { title: `Chest ${m.n}`, line: m.coins ? `${m.coins} coins.` : `${itemName(m.item)}${m.count > 1 ? ` x${m.count}` : ''}.` }
     case 'quest':
       return { title: 'Quest done', line: `${m.name}: ${m.coins ? `+${m.coins} coins` : `+${m.gems} gems`}.` }
+    case 'gear':
+      return { title: 'Training gear', line: `${itemName(m.item)} from a Strong workout. All seven forge a Red Shard.` }
+    case 'kit':
+      return { title: 'Training kit complete', line: 'All seven pieces of Strong gear became a Red Shard.' }
     case 'review':
       return { title: 'Month reviewed', line: 'A Comet Shard is yours. It fits any Mega: three forge a stone.' }
     case 'flee':

@@ -2,7 +2,7 @@
 
 Six small apps and one shared ledger. This guide explains what each part does, how they talk to each other, how the game on top works, why it was designed this way, and what comes next.
 
-Written 2026-10-03, last revised 2026-10-08. **The game runs rules version 8 from 9 Oct 2026. The section "The game: rules version 8" below is current; section 5 and 15 are the earlier versions, kept as history.**
+Written 2026-10-03, last revised 2026-10-12. **The game runs rules version 9 from 12 Oct 2026. The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
 
 ---
 
@@ -17,27 +17,29 @@ The one rule behind every design choice: **the only way to progress is to do the
 
 ---
 
-## The game: rules version 8
+## The game: rules version 9
 
-There is one ruleset. Versions 1 to 7 were removed on 9 Oct 2026 when the game restarted from a clean fold; the last commit that still has them is the git tag `pre-v8` in the pokedex repo. The code is `pokedex/core/` (`rules.ts` has the numbers, `economy.ts` the shops and prices, `fold.ts` the game), copied into Life OS by `npm run core`.
+There is one ruleset. Versions 1 to 8 are gone: the game was folded again from the ledger on 12 Oct 2026 under version 9 (version 8 is the git tag `pre-v9`, version 7 and older the tag `pre-v8`, in the pokedex repo). `RULES-V9.md` in the workspace folder says what changed and why, and `POKEDEX-MECHANICS.md` is the audit that led to it. The code is `pokedex/core/` (`rules.ts` has the numbers, `economy.ts` the shops and prices, `fold.ts` the game), copied into Life OS by `npm run core`.
 
 ### One day does three things
 
 | It moves | By | Why |
 |---|---|---|
 | The partner's XP | how much the day was worth (pillar 100, core 30, standard 3, basic 1), times momentum | Deep work grows the partner. |
-| The wild Pokemon's HP | **how many of the day's habits were ticked**, 100 x share^1.5 x the ball (the share of chores ticked: x1, x1.25, x1.5) | Showing up catches. A day of chores wears it down even with no pillar. |
-| The gym leader's HP | what kind of work was done, with the leader's weak domains x1.5, a type advantage x1.2, the team, a held item, the bond, a registered Mega and domain levels | Deep work wins badges. Leaders have 2,000 HP and keep it between days. |
+| The wild Pokemon's HP | **how many of the day's habits were ticked**, 100 x share^1.5 x the ball (the same share: under half x1, half or more x1.3, four-fifths or more x1.6) | Showing up catches. One share, one curve: the ball is how full the day was. |
+| The gym leader's HP | what kind of work was done, with the leader's weak domains x1.5 and a type advantage x1.2, times (1 + everything that raises a strike, added together: the team, the bond, a Mega, the Life Orb, and for one kind of work its held item, its domain level and the natures on the team) | Deep work wins badges. Leaders have 2,000 HP and keep it between days. |
 
 A perfect day (every habit) catches the wild Pokemon on the spot, one time in ten shiny. A catch made by wearing it down is shiny one time in 50 (25 with a Lucky Egg).
 
 ### What the work pays
 
-- **Coins** for showing up (20 at half the day ticked, 45 at three quarters, 80 for all of it), plus daily and weekly quests, the season ladder, chests and the Professor.
+- **Coins** for showing up (40 at half the day ticked, 90 at three quarters, 140 for all of it), plus the two weekly quests, the season ladder, chests and the Professor. A perfect day also pays 5 gems.
 - **One mark** for each kind of work done that day: Machine Parts (code), Iron (gym), Tones (guitar), Sprouts (Arbor), Bells (a night the band measured; two at 90). A day of 10,000 steps pays an extra Iron. Marks are spent only in that domain's shop: its conditional ball, its lure, its held item, its TMs (the types it owns), and a **domain level** that makes that kind of work strike 3% harder.
 - **Gems** for catches, evolutions, badges and feats: eggs, Full Incense, chests, themes, the Lucky Egg.
 - **Feats** (runs of days, lifetime totals) pay what no shop sells: the Key Stone, shards for forging Mega Stones, the Master Ball, the Amulet Coin, the 1.3 held items.
 - The Mart sells three deals a day, and **always** Max Repel, Revive and the four TMs of the chore types (Water, Ice, Bug, Poison).
+- **Strong's training kit**: each of Strong's seven routines drops its own piece of gear (Protector, Silver Wing, Power Anklet, Power Lens, Power Bracer, Power Band, Power Weight); one of all seven forges a Red Shard.
+- **Incense**: every incense shows three Pokemon and you pick the next wild one (Full Incense any type, a domain incense that domain's types).
 
 ### Stakes (from 23 Oct 2026)
 
@@ -45,7 +47,7 @@ A day with **nothing ticked at all** is settled two days later (a late tick stil
 
 ### The rest
 
-Six trained Pokemon stand behind the partner, each whose type beats the leader's adding 5%. Three TMs can be carried (each counts as one of the partner's types); one item can be held. Berries are hearts (10, 30 and 60 hearts raise the bond: 5% a level). The Key Stone is a feat; three shards of the right colour forge a Mega Stone, registered to that Pokemon for good. Every month-end review ticked in Life OS also pays a **Comet Shard**, a fifth shard that fits any Mega (it is tried last, after the colour that matches).
+Six trained Pokemon stand behind the partner, each adding 2% to every strike and 3% more to the work its nature raised. Three TMs can be carried (each counts as one of the partner's types); one item can be held. Berries are hearts (10, 30 and 60 hearts raise the bond: 5% a level). The Key Stone is a feat; three shards of the right colour forge a Mega Stone, registered to that Pokemon for good. Every month-end review ticked in Life OS also pays a **Comet Shard**, a fifth shard that fits any Mega (it is tried last, after the colour that matches).
 
 ### A day's list can grow but not shrink
 
