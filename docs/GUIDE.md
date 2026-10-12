@@ -2,7 +2,7 @@
 
 Six small apps and one shared ledger. This guide explains what each part does, how they talk to each other, how the game on top works, why it was designed this way, and what comes next.
 
-Written 2026-10-03, last revised 2026-10-13. **The game runs rules version 10 from 13 Oct 2026: version 9 plus the Collect strip, the kept bond and the weekly boss (their own sections below). The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
+Written 2026-10-03, last revised 2026-10-13. **The game runs rules version 11 from 14 Oct 2026 (version 10 plus scarcer Mega Stones): version 9 plus the Collect strip, the kept bond and the weekly boss (their own sections below). The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
 
 ---
 
@@ -40,6 +40,15 @@ A perfect day (every habit) catches the wild Pokemon on the spot, one time in te
 - The Mart sells three deals a day, and **always** Max Repel, Revive and the four TMs of the chore types (Water, Ice, Bug, Poison).
 - **Strong's training kit**: each of Strong's seven routines drops its own piece of gear (Protector, Silver Wing, Power Anklet, Power Lens, Power Bracer, Power Band, Power Weight); one of all seven forges a Red Shard.
 - **Incense**: every incense shows three Pokemon and you pick the next wild one (Full Incense any type, a domain incense that domain's types).
+
+### Mega Stones are scarcer (rules version 11, 14 Oct 2026)
+
+Mega Stones were coming faster than anyone could train a Pokemon able to use one: Strong's training kit paid a Red Shard for **every** full set of its seven pieces with no limit, and a run of seven days paid a shard in each of four domains in the first fortnight. Now:
+
+- **A full set of the kit pays gems and Iron, and every third set a Red Shard too.**
+- **A run of seven days pays 15 gems, not a shard.** (The Key Stone still comes from a run of seven.) Runs of 30 and 100 days and 100 days in all still pay shards.
+- **A stone still costs 3 shards,** and nothing already earned is taken back.
+- Measured on the fixtures, feats alone now give 5 shards by day 151 (was 8) and 12 by day 425 (was 16).
 
 ### The weekly boss (rules version 10, 13 Oct 2026)
 
