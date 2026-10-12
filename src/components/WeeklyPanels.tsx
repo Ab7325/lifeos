@@ -10,6 +10,7 @@ import type { Ticks } from '../lib/store'
 import type { ReviewItem } from '../lib/monthReview'
 import { sundayTickId, type SundayTask } from '../lib/sundayTasks'
 import { POKEDEX_URL } from '../lib/game'
+import { flyReward } from '../lib/flyReward'
 
 export interface WeeklyCtx {
   reviews: ReviewItem[]
@@ -50,10 +51,15 @@ export function MonthReviews({
           <div className="flex items-stretch">
             <button
               type="button"
-              onClick={() => onToggle(ym)}
+              onClick={(e) => {
+                const el = e.currentTarget
+                onToggle(ym)
+                // the shard it pays goes to where rewards wait; the Pokedex collects it
+                if (!done) window.setTimeout(() => flyReward(el, '+1 Comet Shard', document.querySelector('[data-reward-target="collect"]') ? '[data-reward-target="collect"]' : undefined), 260)
+              }}
               aria-pressed={done}
               className={`flex min-w-0 flex-1 items-center gap-3 px-3 py-3 text-left ${
-                done ? 'bg-neo-green' : 'bg-white'
+                done ? 'bg-neo-green' : 'bg-white breathe'
               }`}
             >
               <span
@@ -297,6 +303,7 @@ export function SundayPanel({
       <div className="flex items-center justify-between gap-2">
         <span className="sunday-stamp">☀ Sunday reset</span>
         <span className="flex items-center gap-2">
+          {tasks.length > 0 && done === tasks.length && <span className="sunday-clear" role="status">✓ All clear</span>}
           <span className="num text-sm font-bold">
             {done}/{tasks.length}
           </span>

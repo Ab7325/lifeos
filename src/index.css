@@ -444,3 +444,10 @@ body {
 .reward-pulse { animation: reward-pulse 0.4s ease-out; }
 @keyframes reward-pulse { 0% { filter: brightness(1); transform: scaleY(1); } 35% { filter: brightness(1.6); transform: scaleY(1.35); } 100% { filter: brightness(1); transform: scaleY(1); } }
 @media (prefers-reduced-motion: reduce) { .reward-pulse { animation: none; } }
+
+/* ── motion from the animation study: the claim button's breathing, and a pop for a finished list ── */
+.breathe { animation: breathe 1.134s infinite; }
+@keyframes breathe { 0% { transform: scale(1); animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0.3); } 54% { transform: scale(1.025); animation-timing-function: cubic-bezier(0.16, 0.84, 0.3, 1); } 100% { transform: scale(1); } }
+.sunday-clear { padding: 1px 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; background: #ffd800; border: 2px solid #000; animation: clear-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both; }
+@keyframes clear-pop { 0% { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .breathe, .sunday-clear { animation: none; } }
