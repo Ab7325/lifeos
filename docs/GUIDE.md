@@ -41,7 +41,7 @@ A perfect day (every habit) catches the wild Pokemon on the spot, one time in te
 - **Strong's training kit**: each of Strong's seven routines drops its own piece of gear (Protector, Silver Wing, Power Anklet, Power Lens, Power Bracer, Power Band, Power Weight); one of all seven forges a Red Shard.
 - **Incense**: every incense shows three Pokemon and you pick the next wild one (Full Incense any type, a domain incense that domain's types).
 
-### Stakes (from 23 Oct 2026)
+### Stakes (live from 12 Oct 2026)
 
 A day with **nothing ticked at all** is settled two days later (a late tick still saves it). The leader wins back 100 HP, the wild Pokemon 60, and a tenth of the XP into the level the partner is working on fades. A wild Pokemon that stays 21 days (28 if rare, 42 if legendary) gets away; it is still seen in the Pokedex. Max Repel adds 7 days to a stay; Revive takes back what the leader won on empty days. **Nothing finished is ever taken back:** levels, evolutions, trained and caught Pokemon, badges, feats and items. Hearts only count up.
 
