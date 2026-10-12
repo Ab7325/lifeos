@@ -7,6 +7,7 @@
 import { useSyncExternalStore } from 'react'
 import { BODY_EVENT, LIST_EVENT, USE_EVENT, bodyOf, listsOf, sleepOf, usesOf, type GameEvent, type SleepNight } from '../game-core/events.ts'
 import { bandFrom, type BodyFacts, type ItemUse } from '../game-core/facts.ts'
+import { BOSS_DAY_EVENT, CARD_EVENT, bossOf, type BossInput } from '../game-core/boss.ts'
 import { inOrder } from '../game-core/order.ts'
 import { SLEEP_HABIT } from '../game-core/rules.ts'
 
@@ -21,6 +22,8 @@ export interface GameLink {
   band: string | null
   /** day → the night that ended on it, as the band reported it (bed and wake times, stages, score) */
   nights: Record<string, SleepNight>
+  /** the weekly boss: the cards and each day's progress, written by the Pokedex */
+  boss: BossInput
 }
 
 const KEY = 'lifeos.gamelink.v1'
@@ -28,7 +31,7 @@ const listeners = new Set<() => void>()
 const keyOf = (e: Stored): string => `${e.device ?? ''}|${e.at}|${e.type}|${JSON.stringify(e.payload)}`
 // a vitals row matters here only when it carries something the game reads
 const relevant = (e: Stored): boolean =>
-  e.type === USE_EVENT || e.type === LIST_EVENT || (e.type === BODY_EVENT && ['sleepScore', 'steps', 'recovery', 'sleepMin', 'bed', 'wake'].some((k) => k in (e.payload ?? {})))
+  e.type === USE_EVENT || e.type === LIST_EVENT || e.type === CARD_EVENT || e.type === BOSS_DAY_EVENT || (e.type === BODY_EVENT && ['sleepScore', 'steps', 'recovery', 'sleepMin', 'bed', 'wake'].some((k) => k in (e.payload ?? {})))
 
 function load(): Stored[] {
   try {
@@ -44,7 +47,7 @@ const seen = new Set(events.map(keyOf))
 const derive = (): GameLink => {
   const sorted = inOrder(events)
   const body = bodyOf(sorted)
-  return { body, uses: usesOf(sorted), lists: listsOf(sorted), band: bandFrom({ habits: [], ticks: {}, today: '', body }), nights: sleepOf(sorted) }
+  return { body, uses: usesOf(sorted), lists: listsOf(sorted), band: bandFrom({ habits: [], ticks: {}, today: '', body }), nights: sleepOf(sorted), boss: bossOf(sorted) }
 }
 let state: GameLink = derive()
 

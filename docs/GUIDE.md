@@ -2,7 +2,7 @@
 
 Six small apps and one shared ledger. This guide explains what each part does, how they talk to each other, how the game on top works, why it was designed this way, and what comes next.
 
-Written 2026-10-03, last revised 2026-10-12. **The game runs rules version 9 from 12 Oct 2026. The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
+Written 2026-10-03, last revised 2026-10-13. **The game runs rules version 10 from 13 Oct 2026: version 9 plus the Collect strip, the kept bond and the weekly boss (their own sections below). The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
 
 ---
 
@@ -40,6 +40,22 @@ A perfect day (every habit) catches the wild Pokemon on the spot, one time in te
 - The Mart sells three deals a day, and **always** Max Repel, Revive and the four TMs of the chore types (Water, Ice, Bug, Poison).
 - **Strong's training kit**: each of Strong's seven routines drops its own piece of gear (Protector, Silver Wing, Power Anklet, Power Lens, Power Bracer, Power Band, Power Weight); one of all seven forges a Red Shard.
 - **Incense**: every incense shows three Pokemon and you pick the next wild one (Full Incense any type, a domain incense that domain's types).
+
+### The weekly boss (rules version 10, 13 Oct 2026)
+
+Once the party is six (the partner and five fully trained), a boss comes each Monday for the week. Its **card** has up to five tasks, drawn from what you have really been doing: sets or sessions in Strong, a few Arbor skills, a couple of Woodshed pieces, good nights, steady days. Each task is a share of the boss's HP (gym 30%, Arbor 25%, Woodshed 20%, sleep 15%, days 10%).
+
+- **It is levelled to the party** (13 + 0.18 × the six levels), and a legendary or a Mega is heavier still.
+- **How hard you hit depends on what the six are:** each member's level × its line's rarity (common 1.0 to legendary 1.5) × 1.15 with a Mega, against six of the boss. The leader-card bonuses and +4% per member whose type beats the boss's are added. Six weak Pokemon cannot hurt a Mega legendary.
+- **The kill needs every task:** without the whole card done, no more than 95% of its HP falls. A day the card does not move heals it 3%.
+- **A catch is a chance.** At 40% HP or less you get three throws. A finished card is most of the chance; HP still on it and a party it outmatches both cost.
+- **It pays** at 25, 50 and 75% of its HP, for each finished task, for a kill and for a catch, through the Collect strip. A boss that is not caught leaves on Sunday and nothing is taken back.
+
+The card (`boss_card`) and each day's progress (`boss_day`) are written to the ledger by the Pokedex and read by both apps. Life OS shows one line in the partner strip. `node tools/boss-sim.mjs` in the pokedex repo reports how hard it is for each kind of party. The full design is `BOSS-DESIGN.md` there.
+
+### Motion (13 Oct 2026)
+
+The Pokedex's reveals now follow a motion study: rewards wait to be opened, an evolution has a staged popup, chests open when tapped, sprites flinch when hit, and a forge is three shards going into the stone. `MOTION-AUDIT.md` in the pokedex repo lists what was built and what is next.
 
 ### Collecting rewards (12 Oct 2026)
 

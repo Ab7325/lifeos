@@ -25,7 +25,7 @@ export const spriteUrl = (form: string, shiny = false): string => POKEDEX_URL + 
 
 export function useGame(habits: Habit[], ticks: Ticks, arbor: ArborState, shed: ShedState, link: GameLink, today: string): Game {
   return useMemo(
-    () => foldGame(buildFacts({ habits, ticks, arbor, shed, lists: link.lists, body: link.body, uses: link.uses, today })),
+    () => foldGame(buildFacts({ habits, ticks, arbor, shed, lists: link.lists, body: link.body, uses: link.uses, boss: link.boss, today })),
     [habits, ticks, arbor, shed, link, today],
   )
 }
@@ -112,6 +112,12 @@ export function momentText(m: Moment): { title: string; line: string; form?: str
       return { title: 'Training gear', line: `${itemName(m.item)} from a Strong workout. All seven forge a Red Shard.` }
     case 'kit':
       return { title: 'Training kit complete', line: 'All seven pieces of Strong gear became a Red Shard.' }
+    case 'boss':
+      return m.what === 'appear' ? { title: 'A boss appeared', line: `Lv ${m.level} ${nameOf(m.form)} is here for the week. Its card is in the Pokedex.`, form: m.form }
+        : m.what === 'kill' ? { title: 'Boss beaten', line: `${nameOf(m.form)} is down.`, form: m.form }
+        : m.what === 'catch' ? { title: 'Boss caught!', line: `${m.shiny ? 'A shiny ' : ''}${nameOf(m.form)} is in your Box.`, form: m.form, shiny: m.shiny }
+        : m.what === 'miss' ? { title: 'It broke free', line: `${nameOf(m.form)} shook off throw ${m.n}.`, form: m.form }
+        : { title: 'The boss left', line: `${nameOf(m.form)} is gone. Another comes on Monday.`, form: m.form }
     case 'review':
       return { title: 'Month reviewed', line: 'A Comet Shard is yours. It fits any Mega: three forge a stone.' }
     case 'flee':

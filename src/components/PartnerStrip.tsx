@@ -97,6 +97,7 @@ export function PartnerStrip({ game, left }: { game: Game; left: number }) {
             </>
           )}
           {foe && !league.waiting && <>{' · '}{foe.name} {league.hp.toLocaleString('en-IN')} HP</>}
+          {game.boss && !game.boss.caught && !game.boss.fled && <>{' · '}<b className="partner-today">boss {nameOf(game.boss.form)} {Math.round(game.boss.hpLeft * 100)}% left, {game.boss.daysLeft === 0 ? 'last day' : `${game.boss.daysLeft}d`}</b></>}
         </div>
       </div>
     </div>

@@ -51,6 +51,9 @@ export type EventType =
   | 'item_use'
   // written here for today: the habit list as it stands, so edits on a later day cannot change this one
   | 'day_list'
+  // written by the Pokedex: this week's boss card, and each day's progress on it
+  | 'boss_card'
+  | 'boss_day'
 
 export interface LifeEvent {
   device: string
@@ -214,6 +217,8 @@ function applyEvent(ev: LifeEvent, s: CloudSetters): void {
       break
     case 'day_list':
     case 'item_use':
+    case 'boss_card':
+    case 'boss_day':
       applyGameEvents([ev])
       break
     case 'vitals': {
