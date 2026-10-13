@@ -57,3 +57,7 @@ What I found on the way, which changes the picture above: the old PC script `vit
 What this leaves in the Vitals repo, untouched: the viewer (trackers, trends, My page, Training), the Vercel web sync and its Google sign-in. None of it is needed by the game. Archive the repo when you are happy with the bridge; nothing here deletes it.
 
 Still true: **nothing has run against a real band yet** (`ghealth` is not installed on this machine). First check: `npm run health -- --dry-run` in the Pokedex folder, on a machine with `ghealth`.
+
+## Follow-up, 13 Oct (later): done
+
+The bridge ran against a real band and works. It is now automatic through a Google Health webhook (no PC task, no scheduler); see `pokedex/bridge/README.md`. The Vitals app is not in the path and can be archived. Still true: the band returns no sleep stages, heart rate or HRV, so the sleep score uses length and steadiness only.
