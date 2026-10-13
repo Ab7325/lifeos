@@ -435,9 +435,17 @@ export function useCloudSync(snapshot: CloudSnapshot, setters: CloudSetters): Cl
       for (const ev of data) if (ev.inserted_at && ev.inserted_at > cursor.current) cursor.current = ev.inserted_at
       if (data.length === 0) {
         // Empty ledger + existing local history → seed it (chunked inserts)
-        const seeds = seedEvents(snapRef.current, device.current)
-        for (let i = 0; i < seeds.length; i += 200)
-          await sb.from('events').insert(seeds.slice(i, i + 200))
+        // each seed carries an id, so a retry is ignored where it already landed; what a failure leaves
+        // unsent goes to the outbox (the ledger is no longer empty, so it would never be seeded again)
+        const seeds = seedEvents(snapRef.current, device.current).map((e) => (e.id ? e : { ...e, id: newId() }))
+        for (let i = 0; i < seeds.length; i += 200) {
+          const { error } = await insertOnce(seeds.slice(i, i + 200))
+          if (error) {
+            saveOutbox([...loadOutbox(), ...seeds.slice(i)])
+            setStatus('error')
+            return
+          }
+        }
       } else {
         applyArborEvents(data.filter((e) => e.type === 'skill' || e.type === 'plan'))
         applyShedEvents(data.filter((e) => e.type === 'guitar' || e.type === 'guitar_plan'))

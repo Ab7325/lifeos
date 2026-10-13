@@ -109,9 +109,9 @@ export function momentText(m: Moment): { title: string; line: string; form?: str
     case 'quest':
       return { title: 'Quest done', line: `${m.name}: ${m.coins ? `+${m.coins} coins` : `+${m.gems} gems`}.` }
     case 'gear':
-      return { title: 'Training gear', line: `${itemName(m.item)} from a Strong workout. All seven forge a Red Shard.` }
+      return { title: 'Training gear', line: `${itemName(m.item)} from a Strong workout. A full set of seven pays gems and Iron, and every third set a Red Shard.` }
     case 'kit':
-      return { title: 'Training kit complete', line: 'All seven pieces of Strong gear became a Red Shard.' }
+      return { title: 'Training kit complete', line: 'All seven pieces of Strong gear: gems and Iron are yours, and every third set a Red Shard.' }
     case 'boss':
       return m.what === 'appear' ? { title: 'A boss appeared', line: `Lv ${m.level} ${nameOf(m.form)} is here for the week. Its card is in the Pokedex.`, form: m.form }
         : m.what === 'kill' ? { title: 'Boss beaten', line: `${nameOf(m.form)} is down.`, form: m.form }

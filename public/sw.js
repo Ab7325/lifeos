@@ -8,12 +8,21 @@
 //  • anything else is left to the network
 // Only good responses are cached: ok, HTML for the shell, nothing marked no-store.
 // Bump CACHE when this file's strategy changes; old caches are dropped on activate.
-const CACHE = 'lifeos-shell-v3'
+const CACHE = 'lifeos-shell-v4'
 
 const cacheable = (res, shell) =>
   res.ok &&
   !/no-store/i.test(res.headers.get('cache-control') || '') &&
   (!shell || /text\/html/i.test(res.headers.get('content-type') || ''))
+
+// A missing build file can come back as the shell (the SPA rewrite answers 200 with index.html), which
+// must never be kept as a script or a stylesheet: the app would stay broken after the file arrives.
+const isAssetOk = (path, res) => {
+  const type = res.headers.get('content-type') || ''
+  if (/\.js$/.test(path)) return /javascript|ecmascript/i.test(type)
+  if (/\.css$/.test(path)) return /text\/css/i.test(type)
+  return !/text\/html/i.test(type)
+}
 
 const offline = () => new Response('Offline', { status: 503, statusText: 'Offline' })
 
@@ -33,6 +42,7 @@ async function precache() {
     try {
       const res = await fetch(path)
       if (!res.ok) throw new Error(path + ' ' + res.status)
+      if (!isAssetOk(path, res)) throw new Error(path + ' is not the file it should be (' + (res.headers.get('content-type') || 'no type') + ')')
       if (!cacheable(res)) return null
       await c.put(path, res.clone())
       return res
@@ -71,7 +81,7 @@ self.addEventListener('fetch', (e) => {
   if (url.pathname.startsWith('/assets/') || url.pathname === '/favicon.svg') {
     e.respondWith(
       caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-        if (cacheable(res)) e.waitUntil(put(req, res.clone()))
+        if (cacheable(res) && isAssetOk(url.pathname, res)) e.waitUntil(put(req, res.clone()))
         return res
       }).catch(offline)),
     )

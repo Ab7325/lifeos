@@ -2,7 +2,7 @@
 
 Six small apps and one shared ledger. This guide explains what each part does, how they talk to each other, how the game on top works, why it was designed this way, and what comes next.
 
-Written 2026-10-03, last revised 2026-10-13. **The game runs rules version 11 from 14 Oct 2026 (version 10 plus scarcer Mega Stones): version 9 plus the Collect strip, the kept bond and the weekly boss (their own sections below). The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
+Written 2026-10-03, last revised 2026-10-13. **The game runs rules version 12 (13 Oct 2026): version 9 plus the Collect strip, the kept bond, the weekly boss (version 10), scarcer Mega Stones (version 11) and eggs warmed by steps (version 12); each has its own section below. The section "The game: rules version 9" below is current; section 5 and 15 are the earlier versions, kept as history.**
 
 ---
 

@@ -226,7 +226,12 @@ export function ensureMonths(habits: Habit[], ticks: Ticks, today: string): Mont
  * closest to the month's real end — so a later re-seal never overwrites it.
  */
 export function adoptSnapshot(snap: MonthSnapshot): boolean {
-  if (!snap?.ym || !snap.frozenAt || !Array.isArray(snap.habits)) return false
+  // from another device, so its shape is checked before the month view is allowed to read it
+  if (
+    !snap || typeof snap.ym !== 'string' || !/^\d{4}-\d{2}$/.test(snap.ym) || typeof snap.frozenAt !== 'string' || !snap.frozenAt ||
+    !Array.isArray(snap.habits) || !snap.cells || typeof snap.cells !== 'object' || Array.isArray(snap.cells) ||
+    !Object.values(snap.cells).every((row) => typeof row === 'string')
+  ) return false
   const mine = store[snap.ym]
   if (mine?.frozenAt && mine.frozenAt <= snap.frozenAt) return false
   store[snap.ym] = snap

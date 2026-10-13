@@ -9,6 +9,7 @@
 import { useSyncExternalStore } from 'react'
 import {
   DEFAULT_HABITS,
+  TIERS,
   activateOn,
   archiveOn,
   isLive,
@@ -40,13 +41,24 @@ export interface HabitConfig {
 const CFG_KEY = 'lifeos.habitcfg.v1'
 const EPOCH = '1970-01-01T00:00:00.000Z'
 
+const isDay = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
+/** A config can arrive from another device or the cloud, so its habits are checked, not trusted: a habit that cannot be read is dropped, never half-used. */
+function isHabitShape(h: unknown): h is Habit {
+  const x = h as Partial<Habit> | null
+  if (!x || typeof x.id !== 'string' || !x.id || typeof x.name !== 'string' || !x.name) return false
+  if (typeof x.tier !== 'string' || !(TIERS as readonly string[]).includes(x.tier)) return false
+  // spans are filled in for an old habit that has none (migrateHabit), but a list that is there must be a real one
+  if (x.spans === undefined) return true
+  return Array.isArray(x.spans) && x.spans.every((s) => s && isDay(s.from) && (s.to === null || isDay(s.to)))
+}
+
 /** Every ingress runs through this, so the rest of the app can assume sane spans. */
 function normalize(habits: Habit[], deleted: Iterable<string>): Habit[] {
   const gone = new Set(deleted)
   const seen = new Set<string>()
   const out: Habit[] = []
   for (const h of habits) {
-    if (!h?.id || gone.has(h.id) || seen.has(h.id)) continue
+    if (!isHabitShape(h) || gone.has(h.id) || seen.has(h.id)) continue
     seen.add(h.id)
     out.push(migrateHabit(h))
   }
