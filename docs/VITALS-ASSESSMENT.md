@@ -47,3 +47,13 @@ Mostly. Two things in it are not duplicated elsewhere: the **bedtime guidance** 
 2. **To prove it:** either open the Pokedex on a morning after the Vercel job should have run and check "Last night", or run the PC script once (`node tools/sync.mjs --dry-run`, which prints and writes nothing) on a machine with `ghealth` installed.
 3. **Then decide between A and B.** That is a small, reversible change (hide the screens) and can wait.
 4. **The egg-on-steps change** (rules version 12) should follow the first real sync, not precede it.
+
+## Follow-up, 13 Oct: use the CLI directly, and retire the viewer
+
+You asked whether the Google Health CLI could simply be integrated with the ecosystem. It can, and that is what is built now: **`pokedex/bridge/`**. The CLI gives raw readings; the bridge turns them into ledger events with the scores the game pays on, and the apps read the ledger as before. The Vitals *app* (viewer plus web server) is no longer in that path.
+
+What I found on the way, which changes the picture above: the old PC script `vitals/tools/sync.mjs` wrote the readings but **not the sleep score or recovery**. Only the web sync (`vitals/server/sync.ts`) scored them. So the "direct CLI" path would have fed steps to the game and left the Sleep pillar unmeasured. `bridge/plan.ts` closes that gap, with a test that a night read from the band is written with its score and that a second run writes nothing.
+
+What this leaves in the Vitals repo, untouched: the viewer (trackers, trends, My page, Training), the Vercel web sync and its Google sign-in. None of it is needed by the game. Archive the repo when you are happy with the bridge; nothing here deletes it.
+
+Still true: **nothing has run against a real band yet** (`ghealth` is not installed on this machine). First check: `npm run health -- --dry-run` in the Pokedex folder, on a machine with `ghealth`.

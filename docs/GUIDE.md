@@ -50,6 +50,10 @@ Mega Stones were coming faster than anyone could train a Pokemon able to use one
 - **A stone still costs 3 shards,** and nothing already earned is taken back.
 - Measured on the fixtures, feats alone now give 5 shards by day 151 (was 8) and 12 by day 425 (was 16).
 
+### Eggs (rules version 12, 13 Oct 2026)
+
+A Mystery Egg is **warmed by the band's steps**, not by ticking: every step counts, at most 10,000 a day, and it hatches at 50,000 (40,000 with an Old Charm), so five full days of walking is the fastest. A day with no band reading adds nothing, which means **an egg does not move until a real Vitals sync lands**. One egg warms at a time; spares wait in the Bag. **A boss you beat now drops an egg** (a catch is not needed), and the Rare shop still sells one for 150 gems. The Box-is-empty replacement partner is a plain new starter, no longer labelled "hatched from an egg".
+
 ### The weekly boss (rules version 10, 13 Oct 2026)
 
 Once the party is six (the partner and five fully trained), a boss comes each Monday for the week. Its **card** has up to five tasks, drawn from what you have really been doing: sets or sessions in Strong, a few Arbor skills, a couple of Woodshed pieces, good nights, steady days. Each task is a share of the boss's HP (gym 30%, Arbor 25%, Woodshed 20%, sleep 15%, days 10%).
@@ -177,7 +181,7 @@ Kept for the reasoning. For the rules in force see "The game today" near the top
 
 ### One partner, one bar
 
-There is exactly one active partner. Every XP you earn goes to it. You never assign anything to anything. When it is fully trained it moves into the Pokedex for good, and the next one in the queue (oldest catch first) takes over. If the queue is empty, an egg hatches, so the loop never stalls.
+There is exactly one active partner. Every XP you earn goes to it. You never assign anything to anything. When it is fully trained it moves into the Pokedex for good, and the next one in the queue (oldest catch first) takes over. If the queue is empty, a new starter takes over (it used to be called an egg, which it was not), so the loop never stalls.
 
 The first partner is Charmander.
 
@@ -289,7 +293,7 @@ And three ideas from it that shaped specific rules:
 - **Gym cannot be ticked by hand.** You wanted the tick to mean the work happened. The game follows the same principle: XP counts for a day only if the tick was made in time.
 - **Coaches decide; you do.** You asked Arbor and Woodshed to pick the day's work so you never have to. The game makes no demand for decisions either: one partner, automatic queue, automatic branches.
 - **Everything visible in Life OS, nothing extra.** You did not want to open Arbor separately. The Pokedex is the same: one card in Life OS, the rest elsewhere.
-- **Catching only on a perfect day.** You chose to keep catching rare so that raising the partner is the daily aim. The egg rule exists so that this strictness never leaves you with nothing to raise.
+- **Catching only on a perfect day.** You chose to keep catching rare so that raising the partner is the daily aim. The empty-Box starter exists so that this strictness never leaves you with nothing to raise.
 - **Routine pays little, but not zero.** Your words: if it paid nothing, you might not do it.
 - **No set types, no rest timer, no merged apps.** Each tool does one thing.
 
@@ -339,7 +343,7 @@ You plan to add a Fitbit Air and build an app on Google's health API (the `gheal
 
 1. **Sleep as a measured fifth pillar.** "Sleep At 10" ticked and locked by the band, the way Gym is by Strong.
 2. **Trainer stats.** Six numbers on a radar chart, each a level against your own baseline: HP from sleep, Attack from strength (Strong's lifts), Defense from recovery (HRV, resting heart rate), Sp. Atk from code, Sp. Def from guitar, Speed from cardio. Three of these can be computed today.
-3. **Eggs that hatch on real steps** instead of hatching at once.
+3. ~~**Eggs that hatch on real steps**~~ Done in rules version 12 (see the egg section).
 4. **Checks.** Weigh-in from the scale, an exercise session confirming Gym.
 5. **Readiness for the coaches.** Arbor and Strong lightening a session on a low-readiness morning. This changes the plan, not the XP.
 
@@ -448,7 +452,7 @@ So the only thing Vitals can change today is one habit tick, and only in your fa
 
 - **The band sync has never run for real.** `tools/sync.mjs` reads Google Health through the `ghealth` tool and writes `vitals` events. It is tested against the documented shapes only. It needs Go installed, a Google Cloud project and a sign-in. A few field names (variability, blood oxygen, skin temperature) are best guesses.
 - **No measured Sleep pillar.** Sleep is still a 30 XP core habit.
-- **No trainer stats, no eggs on steps.**
+- **No trainer stats.** (Eggs on steps are done, but stay still until the band's steps arrive.)
 - **Goals live on each device.** The bedtime and step goals you set in Vitals are not shared; Life OS uses a fixed 22:30.
 
 ---
@@ -486,7 +490,7 @@ In the order I would do it.
 7. Schedule the sync (a daily task on the PC is enough).
 8. Make Sleep a measured pillar: worth 100, locked like Gym.
 9. Trainer stats on a radar in Pokedex: sleep, strength, recovery, code, guitar, cardio.
-10. Eggs that hatch on real steps.
+10. ~~Eggs that hatch on real steps.~~ Done (version 12).
 11. Share goals through the ledger so every app agrees on bedtime and step targets.
 
 ### Whenever
@@ -550,7 +554,7 @@ Expected pace, from the simulator on invented behaviour: at about two-thirds of 
 
 ### The Box
 
-Caught Pokemon go to a Box, not a queue: nothing in it is waiting for anything. When the partner is fully trained, the oldest in the Box takes over unless you tapped another one in the Pokedex first, which is free. An egg hatches only if the Box is empty. The Pokedex counts three things per region: seen, caught, raised.
+Caught Pokemon go to a Box, not a queue: nothing in it is waiting for anything. When the partner is fully trained, the oldest in the Box takes over unless you tapped another one in the Pokedex first, which is free. A new starter arrives only if the Box is empty. The Pokedex counts three things per region: seen, caught, raised.
 
 ### The league: leaders have HP
 
