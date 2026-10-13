@@ -43,12 +43,28 @@ export function MonthReviews({
   return (
     <div className="space-y-3">
       {reviews.map(({ ym, done }) => (
-        <div key={ym} className="neo-card overflow-hidden bg-white">
+        <div key={ym} className={`neo-card overflow-hidden ${done ? 'neo-card-green' : ''}`}>
           <div className="flex items-center justify-between border-b-[3px] border-black bg-neo-red px-3 py-1 font-display text-[11px] font-bold uppercase tracking-widest text-white">
             <span>◉ Month-end review</span>
             <span className="num">{monthLabel(ym)}</span>
           </div>
-          <div className="flex items-stretch">
+          <div className="flex items-center gap-3 px-3 pt-3">
+            {/* the shard it pays: just the picture, floating, with no box behind it */}
+            <span aria-hidden className={`review-shard ${done ? 'is-done' : ''}`}>
+              {POKEDEX_URL ? (
+                <img src={`${POKEDEX_URL}/sprites/items/comet-shard.png`} alt="" width={44} height={44} style={{ imageRendering: 'pixelated' }} />
+              ) : (
+                <span className="text-3xl">◆</span>
+              )}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-lg font-bold leading-tight">{done ? `${monthLabel(ym)} is closed` : `Review ${monthLabel(ym)}`}</span>
+              <span className="mt-0.5 block text-[12px] font-bold leading-snug text-black/60">
+                {done ? 'A Comet Shard is waiting in the Pokedex.' : 'Look over the graph, then close the month. It pays a Comet Shard and stays here until you do.'}
+              </span>
+            </span>
+          </div>
+          <div className="flex gap-2 p-3">
             <button
               type="button"
               onClick={(e) => {
@@ -58,41 +74,16 @@ export function MonthReviews({
                 if (!done) window.setTimeout(() => flyReward(el, '+1 Comet Shard', document.querySelector('[data-reward-target="collect"]') ? '[data-reward-target="collect"]' : undefined), 260)
               }}
               aria-pressed={done}
-              className={`flex min-w-0 flex-1 items-center gap-3 px-3 py-3 text-left ${
-                done ? 'bg-neo-green' : 'bg-white breathe'
-              }`}
+              className={`neo-button flex-1 px-4 py-2.5 text-base font-bold ${done ? '' : 'neo-card-yellow'}`}
             >
-              <span
-                aria-hidden
-                className={`relative flex h-9 w-9 shrink-0 items-center justify-center border-[3px] border-black text-base font-bold ${
-                  done ? 'bg-white' : 'bg-neo-yellow'
-                }`}
-              >
-                {POKEDEX_URL ? (
-                  <img src={`${POKEDEX_URL}/sprites/items/comet-shard.png`} alt="" width={28} height={28} style={{ imageRendering: 'pixelated' }} className={done ? 'opacity-40' : ''} />
-                ) : (
-                  <span>◆</span>
-                )}
-                {done && <span className="absolute -bottom-1.5 -right-1.5 flex h-4 w-4 items-center justify-center border-2 border-black bg-neo-green text-[10px] leading-none">✓</span>}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className={`block text-base font-bold ${done ? 'line-through opacity-80' : ''}`}>
-                  Review {monthLabel(ym)}
-                </span>
-                <span className="block text-[11px] font-bold leading-snug text-black/60">
-                  {done
-                    ? 'Reviewed — tap to undo'
-                    : 'Look over the graph, then tap to close the month. Pays a Comet Shard. Stays here until you do.'}
-                </span>
-              </span>
+              {done ? '✓ Closed · tap to undo' : `Close ${monthLabel(ym).split(' ')[0]}`}
             </button>
             <button
               type="button"
               onClick={() => onOpen(ym)}
-              className="shrink-0 border-l-[3px] border-black bg-white px-3 text-[11px] font-bold uppercase leading-tight"
+              className="neo-button shrink-0 bg-white px-3 py-2.5 text-[12px] font-bold uppercase leading-tight"
             >
-              Graph
-              <br />↗
+              Graph ↗
             </button>
           </div>
         </div>

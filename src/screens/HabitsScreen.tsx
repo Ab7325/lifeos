@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, Reorder, motion, useDragControls } from 'framer-motion'
 import { flyReward } from '../lib/flyReward'
+import * as kit from '../ui-kit/motion.js'
 import { TIERS, TIER_XP, domainOf, type Habit, type Tier } from '../config/habits'
 import type { Ticks } from '../lib/store'
 import { PartnerStrip } from '../components/PartnerStrip'
@@ -259,6 +260,17 @@ function ChecklistRow({
 }) {
   const controls = useDragControls()
   const ticked = Boolean(ticks[today]?.[habit.id])
+  // a tick lands with a flash on the row and the XP stamped in (and not on load, or when it is un-ticked)
+  const rowEl = useRef<HTMLDivElement>(null)
+  const xpEl = useRef<HTMLSpanElement>(null)
+  const wasTicked = useRef(ticked)
+  useEffect(() => {
+    if (ticked && !wasTicked.current && rowEl.current && !kit.config.reduced) {
+      void kit.flash(rowEl.current, '#ffffff', { dur: 300, peak: 0.55 })
+      if (xpEl.current) void kit.motion.stampIn(xpEl.current, { from: 1.5, flashColor: '#fff' })
+    }
+    wasTicked.current = ticked
+  }, [ticked])
   const xp = tierXp(habit.tier)
   // Linked habits are fed by Strong / Arbor and wear that app's look.
   // once the band is in use the Sleep row shows the night, or says it is waiting for it
@@ -290,7 +302,8 @@ function ChecklistRow({
       whileDrag={{ scale: 1.03, zIndex: 30 }}
     >
       <div
-        className={`neo-button flex w-full items-center gap-1 py-1 pl-1 pr-3 text-left ${
+        ref={rowEl}
+        className={`neo-button relative flex w-full items-center gap-1 py-1 pl-1 pr-3 text-left ${
           link ? `tile-${link} ${ticked ? 'is-done' : ''}` : ticked ? 'neo-card-green' : 'bg-neo-white'
         } ${open ? 'mb-0' : ''}`}
       >
@@ -369,7 +382,8 @@ function ChecklistRow({
             {habit.name}
           </span>
           <span
-            className={`num shrink-0 text-base font-bold ${
+            ref={xpEl}
+            className={`num relative shrink-0 text-base font-bold ${
               ticked ? 'text-black' : 'text-neo-gray-dark'
             }`}
           >
@@ -636,11 +650,12 @@ export function HabitsScreen({
       // whatever expires now flies its XP to the partner's bar as the row leaves
       if (!showAll) {
         const t0 = Date.now() + 25
+        let n = 0
         for (const h of live) {
           const at = todayRaw?.[h.id]
           if (!at || Date.parse(at) + DONE_HIDE_MS > t0) continue
           const row = document.querySelector(`[data-habit-row="${CSS.escape(h.id)}"]`)
-          if (row) flyReward(row, `+${tierXp(h.tier)}`)
+          if (row) flyReward(row, `+${tierXp(h.tier)}`, undefined, n++ * 180) // several leave one after another, not on top of each other
         }
       }
       setNow(Date.now())

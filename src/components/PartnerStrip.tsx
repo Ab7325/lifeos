@@ -78,7 +78,7 @@ export function PartnerStrip({ game, left }: { game: Game; left: number }) {
           {game.wallet.coinsToday > 0 && <> · <b className="partner-today">+<AnimatedNumber value={game.wallet.coinsToday} /></b> coins</>}
           {marksToday(game) > 0 && <> · <b className="partner-today">+{marksToday(game)}</b> marks</>}
           {game.held.length > 0 && <> · <a href={POKEDEX_URL || undefined} target="_blank" rel="noreferrer" data-reward-target="collect" className="partner-today" title="Rewards wait in the Pokedex until you tap them, or pay themselves after three days">{game.held.length} to collect</a></>}
-          {momentum.mult > 1 && <> · ×{momentum.mult} momentum</>}
+          {momentum.mult > 1 && <> · <span className={`flame t${momentum.mult >= 1.5 ? 3 : momentum.mult >= 1.35 ? 2 : 1}`} title={`${momentum.days} of the last 7 days with two pillars: XP ×${momentum.mult}`}><i aria-hidden /><b>×{momentum.mult}</b></span></>}
           {game.sleep.state === 'measured' && <> · slept <b className="partner-today">{game.sleep.score}</b></>}
           {game.sleep.state === 'self' && <> · sleep: waiting for the band</>}
           {' · '}
