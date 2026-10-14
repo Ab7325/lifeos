@@ -15,7 +15,8 @@
 // and the full habit × day grid. The ranking of habits sits shut at the bottom.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { domainOf, type Habit } from '../config/habits'
-import { tagOf } from '../game-core/rules.ts'
+import { SLEEP_HABIT, tagOf } from '../game-core/rules.ts'
+import type { SleepNight } from '../game-core/events.ts'
 import type { Ticks } from '../lib/store'
 import {
   buildDraft,
@@ -103,12 +104,15 @@ export function MonthView({
   ticks,
   today,
   initialYm,
+  nights,
 }: {
   habits: Habit[]
   ticks: Ticks
   today: string
   /** open on this month instead of the running one (month-end review's "Graph" jump) */
   initialYm?: string
+  /** the band's nights, so the Sleep row shows each night's score */
+  nights?: Record<string, SleepNight>
 }) {
   const [ym, setYm] = useState(() => initialYm ?? ymOf(today))
   const months = useMonths() // re-render when a month seals or one arrives from another device
@@ -458,6 +462,14 @@ export function MonthView({
                   {cells.map((c, i) => {
                     const d = days[i]
                     const isToday = iso(d) === today
+                    // Sleep's row is the night's score from the band, shaded by how good it was
+                    const score = h.id === SLEEP_HABIT ? nights?.[iso(d)]?.score : undefined
+                    if (score !== undefined)
+                      return (
+                        <div key={d} title={`Sleep — ${pad2(d)} ${label}: score ${score}`} className={`flex w-7 shrink-0 items-center justify-center border-r border-black/10 py-1.5 lg:w-8 ${isToday ? 'border-x border-black/30 bg-neo-yellow/20' : ''}`}>
+                          <div className="sleep-cell num" style={{ background: score >= 90 ? '#f2c14e' : score >= 80 ? '#7fd38a' : score >= 70 ? '#9aa6ff' : '#d8d3ff' }}>{score}</div>
+                        </div>
+                      )
                     return (
                       <div
                         key={d}

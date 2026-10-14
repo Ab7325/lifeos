@@ -10,6 +10,7 @@ import { bandFrom, type BodyFacts, type ItemUse } from '../game-core/facts.ts'
 import { BOSS_DAY_EVENT, CARD_EVENT, bossOf, type BossInput } from '../game-core/boss.ts'
 import { inOrder } from '../game-core/order.ts'
 import { SLEEP_HABIT } from '../game-core/rules.ts'
+import { DAY_START_EVENT } from '../game-core/day.ts'
 
 type Stored = GameEvent & { device?: string; inserted_at?: string }
 
@@ -24,6 +25,8 @@ export interface GameLink {
   nights: Record<string, SleepNight>
   /** the weekly boss: the cards and each day's progress, written by the Pokedex */
   boss: BossInput
+  /** calendar dates started by hand ("Start my day"), when the band's reading had not come */
+  started: string[]
 }
 
 const KEY = 'lifeos.gamelink.v1'
@@ -31,7 +34,7 @@ const listeners = new Set<() => void>()
 const keyOf = (e: Stored): string => `${e.device ?? ''}|${e.at}|${e.type}|${JSON.stringify(e.payload)}`
 // a vitals row matters here only when it carries something the game reads
 const relevant = (e: Stored): boolean =>
-  e.type === USE_EVENT || e.type === LIST_EVENT || e.type === CARD_EVENT || e.type === BOSS_DAY_EVENT || (e.type === BODY_EVENT && ['sleepScore', 'steps', 'recovery', 'sleepMin', 'bed', 'wake'].some((k) => k in (e.payload ?? {})))
+  e.type === USE_EVENT || e.type === LIST_EVENT || e.type === DAY_START_EVENT || e.type === CARD_EVENT || e.type === BOSS_DAY_EVENT || (e.type === BODY_EVENT && ['sleepScore', 'steps', 'recovery', 'sleepMin', 'bed', 'wake'].some((k) => k in (e.payload ?? {})))
 
 function load(): Stored[] {
   try {
@@ -47,7 +50,7 @@ const seen = new Set(events.map(keyOf))
 const derive = (): GameLink => {
   const sorted = inOrder(events)
   const body = bodyOf(sorted)
-  return { body, uses: usesOf(sorted), lists: listsOf(sorted), band: bandFrom({ habits: [], ticks: {}, today: '', body }), nights: sleepOf(sorted), boss: bossOf(sorted) }
+  return { body, uses: usesOf(sorted), lists: listsOf(sorted), band: bandFrom({ habits: [], ticks: {}, today: '', body }), nights: sleepOf(sorted), boss: bossOf(sorted), started: [...new Set(sorted.filter((e) => e.type === DAY_START_EVENT).map((e) => e.day))] }
 }
 let state: GameLink = derive()
 
@@ -70,7 +73,7 @@ export function applyGameEvents(fresh: Stored[]): void {
   listeners.forEach((l) => l())
 }
 
-/** A sleep habit is filled by the band only on a morning it has a reading. With none, it can be ticked by hand (SLEEP-DESIGN.md D2). */
+/** A sleep habit is filled by the band only on a morning it has a reading. (Since version 13 it is never ticked by hand: with no reading it waits.) */
 export const sleepMeasured = (link: GameLink, habitId: string, day: string): boolean =>
   habitId === SLEEP_HABIT && typeof link.body[day]?.sleepScore === 'number'
 

@@ -8,7 +8,7 @@
 // First boot against an empty table seeds it from existing localStorage history.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import { dateISO, type Ticks } from './store'
+import { type Ticks } from './store'
 import type { HealthMap, MetricsMap, Stores, WorkoutMap } from './ledger'
 import type { Habit } from '../config/habits'
 import { applyConfig, getConfig } from './habitConfig'
@@ -18,6 +18,7 @@ import { supabase } from './supabase'
 import { GYM_HABIT, applyArborEvents, markStrongLinked } from './arborLink'
 import { applyShedEvents } from './guitarLink'
 import { applyGameEvents } from './gameLink'
+import { currentDay } from './day'
 import { inOrder } from '../game-core/order.ts'
 import { SEED_AT, applySundayList, getSundayList, type SundayTask } from './sundayTasks'
 
@@ -54,6 +55,8 @@ export type EventType =
   // written by the Pokedex: this week's boss card, and each day's progress on it
   | 'boss_card'
   | 'boss_day'
+  // written here when the day is started by hand before the band's reading arrived (game-core/day.ts)
+  | 'day_start'
 
 export interface LifeEvent {
   device: string
@@ -219,6 +222,7 @@ function applyEvent(ev: LifeEvent, s: CloudSetters): void {
     case 'item_use':
     case 'boss_card':
     case 'boss_day':
+    case 'day_start':
       applyGameEvents([ev])
       break
     case 'vitals': {
@@ -383,7 +387,7 @@ export function useCloudSync(snapshot: CloudSnapshot, setters: CloudSetters): Cl
   }, [])
 
   const emit = useCallback(
-    (type: EventType, payload: LifeEvent['payload'], day: string = dateISO()) => {
+    (type: EventType, payload: LifeEvent['payload'], day: string = currentDay()) => {
       if (!supabase) return
       const id = newId()
       const ev: LifeEvent = {

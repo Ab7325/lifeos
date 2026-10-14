@@ -16,6 +16,16 @@
 import { useSyncExternalStore } from 'react'
 import { isActiveOn, isLive, type Habit, type Tier } from '../config/habits'
 import type { Ticks } from './store'
+import { SLEEP_DONE, SLEEP_HABIT, V13_START } from '../game-core/rules.ts'
+
+/**
+ * Sleep is the band's (version 13): its row is the night's reading, not a tick. A night of SLEEP_DONE or more is done, a lower
+ * one a miss, and a night with no reading is grey (never a miss). App keeps this current from the ledger.
+ */
+let sleepScores: Record<string, number> = {}
+export const setSleepScores = (scores: Record<string, number>): void => { sleepScores = scores }
+const sleepCode = (day: string, active: boolean): string | null =>
+  day < V13_START ? null : typeof sleepScores[day] === 'number' ? (sleepScores[day] >= SLEEP_DONE ? '1' : '0') : active ? '-' : '-'
 
 export type CellCode = '1' | '0' | '-'
 
@@ -124,7 +134,12 @@ export function buildMonth(ym: string, habits: Habit[], ticks: Ticks): MonthSnap
     let row = ''
     let any = false
     for (const day of days) {
-      if (ticks[day]?.[h.id]) {
+      const sc = h.id === SLEEP_HABIT ? sleepCode(day, isActiveOn(h, day)) : null
+      if (sc !== null) {
+        row += sc
+        if (sc !== '-') any = true
+        else if (isActiveOn(h, day)) any = true
+      } else if (ticks[day]?.[h.id]) {
         row += '1'
         any = true
       } else if (isActiveOn(h, day)) {
@@ -166,6 +181,8 @@ function seal(draft: MonthSnapshot, ticks: Ticks, at: string): MonthSnapshot {
     const row = draft.cells[h.id] ?? '-'.repeat(n)
     let out = ''
     for (let i = 0; i < n; i++) {
+      const sc = h.id === SLEEP_HABIT ? sleepCode(dayIso(draft.ym, i + 1), true) : null
+      if (sc !== null) { out += sc; continue }
       const ticked = Boolean(ticks[dayIso(draft.ym, i + 1)]?.[h.id])
       const was = row[i] ?? '-'
       // A tick always wins. Without one, a day the draft called "done" was at

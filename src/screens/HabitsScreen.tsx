@@ -267,7 +267,8 @@ function ChecklistRow({
   const xp = tierXp(habit.tier)
   // Linked habits are fed by Strong / Arbor and wear that app's look.
   // once the band is in use the Sleep row shows the night, or says it is waiting for it
-  const link = habit.id === SLEEP_HABIT && linked.sleep.state !== 'off' ? ('vitals' as const) : linkOf(habit.id)
+  // Sleep is the band's (version 13): it always wears the night-sky tile and is never ticked by hand
+  const link = habit.id === SLEEP_HABIT ? ('vitals' as const) : linkOf(habit.id)
   // a pillar no app feeds wears the default pillar look, charged in its kind of work's colour
   const pillar = !link && habit.tier === 'pillar'
   const run = useMemo(() => (pillar ? runOf(ticks, habit.id, today) : 0), [pillar, ticks, habit.id, today])

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { dateISO, loadTicks, saveTicks, type Ticks } from './lib/store'
+import { loadTicks, saveTicks, type Ticks } from './lib/store'
+import { useToday } from './lib/day'
 import {
   loadHealth,
   loadMetrics,
@@ -26,7 +27,7 @@ import {
   useHabits,
   type HabitConfig,
 } from './lib/habitConfig'
-import { ensureMonths } from './lib/monthSnapshot'
+import { ensureMonths, setSleepScores } from './lib/monthSnapshot'
 import { VITALS_URL, useCloudSync } from './lib/cloudSync'
 import { TabBar, type Tab } from './components/TabBar'
 import { HabitsScreen, type HabitActions } from './screens/HabitsScreen'
@@ -44,7 +45,8 @@ import { SKILL_BY_ID } from './arbor-core/skills.ts'
 import { useGame } from './lib/game'
 import { applyGameEvents, sleepMeasured, sleepState, useGameLink } from './lib/gameLink'
 import { listAdds } from './game-core/events.ts'
-import { SLEEP_DONE, SLEEP_HABIT } from './game-core/rules.ts'
+import { SLEEP_DONE, SLEEP_HABIT, V13_START } from './game-core/rules.ts'
+import { DAY_START_EVENT } from './game-core/day.ts'
 import { Moments } from './components/PartnerStrip'
 
 export default function App() {
@@ -53,7 +55,8 @@ export default function App() {
   const [metrics, setMetrics] = useState<MetricsMap>(() => loadMetrics())
   const [health, setHealth] = useState<HealthMap>(() => loadHealth())
   const [workouts, setWorkouts] = useState<WorkoutMap>(() => loadWorkouts())
-  const today = dateISO()
+  // the waking day: after midnight it stays yesterday until the band reads the night (lib/day.ts)
+  const { today, calendar } = useToday()
   // `habits` is the whole library, in one canonical order; the checklist is its
   // live slice and the shelf is the rest — same order, two sections.
   const habits = useHabits()
@@ -80,11 +83,13 @@ export default function App() {
   // Held back until the ledger has finished replaying: a fresh device that
   // sealed first would stamp empty months over real history. (An earlier seal
   // from a peer still wins on merge, but not sealing garbage is cheaper.)
+  const sleepLink = useGameLink()
   useEffect(() => {
     if (cloud.status === 'connecting') return
+    setSleepScores(Object.fromEntries(Object.entries(sleepLink.body).flatMap(([d, b]) => (typeof b.sleepScore === 'number' ? [[d, b.sleepScore]] : []))))
     for (const snap of ensureMonths(habits, ticks, today))
       cloud.emit('month', { ym: snap.ym, snapshot: JSON.stringify(snap) }, `${snap.ym}-01`)
-  }, [habits, ticks, today, cloud])
+  }, [habits, ticks, today, cloud, sleepLink])
 
   // A drag fires onReorder on every frame it crosses a neighbour. Committing
   // locally each time is what makes the rows shove each other around; the cloud
@@ -147,6 +152,20 @@ export default function App() {
     if (!settled) return
     const cfg = configWithLinkedHabit({ id: GUITAR_HABIT, name: 'Woodshed', emoji: '🎸', tier: 'pillar' }, 2, today)
     if (cfg) emitConfig(commitConfig(cfg))
+  }, [settled, today, emitConfig])
+
+  // Sleep comes back as a pillar the band fills (version 13): first row, never ticked by hand. Only once: a Sleep habit
+  // the user closes again after that is left closed.
+  useEffect(() => {
+    if (!settled) return
+    const cfg = getConfig()
+    if (cfg.deleted.includes(SLEEP_HABIT)) return
+    const h = cfg.habits.find((x) => x.id === SLEEP_HABIT)
+    if (h && (isActiveOn(h, today) || h.spans.some((sp) => sp.to === null || sp.to > V13_START))) return
+    const sleep = { id: SLEEP_HABIT, name: 'Sleep', emoji: '🌙', tier: 'pillar' as Tier, domain: 'sleep' as const }
+    const rest = cfg.habits.filter((x) => x.id !== SLEEP_HABIT)
+    const revived = h ? { ...h, ...sleep, spans: [...h.spans, { from: today, to: null }] } : { ...sleep, spans: [{ from: today, to: null }] }
+    emitConfig(commitConfig({ ...cfg, habits: [revived, ...rest], at: new Date().toISOString(), source: 'app' }))
   }, [settled, today, emitConfig])
 
   // The game's tiers arrived after these habits did: lift the three pillars
@@ -276,7 +295,7 @@ export default function App() {
 
   const toggle = (habitId: string) => {
     if (isLocked(habitId)) return // fed by Strong / Arbor — not ticked by hand
-    if (sleepMeasured(link, habitId, today)) return // filled by the band's sleep score
+    if (habitId === SLEEP_HABIT) return // filled by the band's reading of the night, never by hand
     if (habitId === GUITAR_HABIT && session.length > 0) return // ticks itself when the session is logged
     const wasTicked = Boolean(ticks[today]?.[habitId])
     const at = new Date().toISOString()
@@ -294,6 +313,13 @@ export default function App() {
     } catch {
       /* no vibration here */
     }
+  }
+
+  // After midnight, before the band has read the night: the new day can be started by hand (one `day_start` for the date)
+  const startDay = () => {
+    const ev = { type: DAY_START_EVENT, day: calendar, at: new Date().toISOString(), payload: {} }
+    applyGameEvents([ev])
+    cloud.emit('day_start', {}, calendar)
   }
 
   // ── not-every-day blocks: month-end review + Sunday reset ──
@@ -366,8 +392,8 @@ export default function App() {
       <header className="app-head">
         <h1 className="app-logo">LifeOS</h1>
         <div className="app-date">
-          <b>{new Date().toLocaleDateString('en-IN', { weekday: 'long' })}</b>
-          <span>{new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <b>{new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' })}</b>
+          <span>{new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
         <span
           className={`sync-dot is-${cloud.status}`}
@@ -383,6 +409,16 @@ export default function App() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 34 }}
       >
+        {tab === 'daily' && today !== calendar && (
+          <div className="wake-banner neo-card" role="status">
+            <span className="wake-moon" aria-hidden>🌙</span>
+            <span className="min-w-0 flex-1">
+              <b className="block">Still {new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' })}</b>
+              <small className="block">Your day ends when you wake: it rolls over once the band reads the night{new Date().getHours() < 14 ? ', or at 2 pm' : ''}. Ticks now still count for {new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' })}.</small>
+            </span>
+            <button type="button" className="wake-start" onClick={startDay}>Start my day</button>
+          </div>
+        )}
         {tab === 'daily' && (
           <HabitsScreen
             habits={habits}
@@ -397,7 +433,7 @@ export default function App() {
           />
         )}
         {tab === 'monthly' && (
-          <MonthView habits={habits} ticks={ticks} today={today} initialYm={monthFocus ?? undefined} />
+          <MonthView habits={habits} ticks={ticks} today={today} initialYm={monthFocus ?? undefined} nights={link.nights} />
         )}
       </motion.main>
 

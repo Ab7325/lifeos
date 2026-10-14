@@ -302,36 +302,57 @@ const Moon = () => (
 const hm = (m: number) => `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`
 const clock = (s?: string) => (s ? s.slice(11, 16) : '')
 
+/** Samsung Health's words for a score (the ones Vitals uses). */
+const scoreWord = (n: number) => (n >= 90 ? 'Excellent' : n >= 80 ? 'Good' : n >= 70 ? 'Fair' : 'Poor')
+const STAGES: [keyof SleepNight, string][] = [['deepMin', '#6b5be0'], ['remMin', '#63c6ff'], ['lightMin', '#a9b3d6'], ['awakeMin', '#ff7aa8']]
+
 /**
- * The Sleep row once the band is in use. With last night's reading it shows the
- * night and what it paid, and cannot be ticked. Without one it can be ticked by
- * hand for a core habit's XP, and the reading replaces that when it arrives.
+ * Sleep, the pillar the band fills (version 13): never ticked by hand. With last night's reading it is a small sleep card in the
+ * Vitals way (the score on a ring, how long, from when to when, the stages, and what it paid); without one it waits, and a night
+ * with no reading is simply not part of the day.
  */
-export function SleepTile({ name, state, night, ticked, selfXp, onToggle }: { name: string; state: SleepState; night: SleepNight | undefined; ticked: boolean; selfXp: number; onToggle: () => void }) {
-  if (state === 'measured') {
-    const score = night?.score ?? 0
-    const bits = [night?.sleepMin !== undefined ? hm(night.sleepMin) : '', night?.bed && night?.wake ? `${clock(night.bed)} to ${clock(night.wake)}` : '', `score ${score}`].filter(Boolean)
+export function SleepTile({ name, state, night }: { name: string; state: SleepState; night: SleepNight | undefined; ticked?: boolean; selfXp?: number; onToggle?: () => void }) {
+  if (state === 'measured' && night) {
+    const score = night.score ?? 0
+    const bells = score >= 90 ? 2 : score >= 80 ? 1 : 0
+    const total = STAGES.reduce((n, [k]) => n + ((night[k] as number | undefined) ?? 0), 0)
+    const r = 15, c = 2 * Math.PI * r
     return (
-      <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Measured by your band. A night of 80 or more fills the pillar.">
-        <Moon />
-        <span className="min-w-0 flex-1">
-          <span className={`vit-title block truncate ${ticked ? 'opacity-90' : ''}`}>{name}</span>
-          <span className="block truncate text-[11px] font-bold opacity-80">{bits.join(' · ')}</span>
+      <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Measured by your band: the score is the pillar's XP; 80 or more fills it and pays a Bell, 90 two.">
+        <span className="sleep-ring" aria-label={`Sleep score ${score}`}>
+          <svg viewBox="0 0 36 36" width="46" height="46" aria-hidden>
+            <circle cx="18" cy="18" r={r} fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="4" />
+            <circle cx="18" cy="18" r={r} fill="none" stroke={score >= 80 ? '#f2c14e' : '#8f86ff'} strokeWidth="4" strokeLinecap="round" strokeDasharray={`${(c * score) / 100} ${c}`} transform="rotate(-90 18 18)" />
+          </svg>
+          <b className="num">{score}</b>
         </span>
-        <span className="vit-score num shrink-0">{score}</span>
-        <span className="num shrink-0 text-base font-bold">{`+${score}`}</span>
+        <span className="min-w-0 flex-1">
+          <span className="vit-title block truncate">{name} <small className="sleep-word">{scoreWord(score)}</small></span>
+          <span className="block truncate text-[11px] font-bold opacity-85">
+            {[night.sleepMin !== undefined ? hm(night.sleepMin) : '', night.bed && night.wake ? `${clock(night.bed)} to ${clock(night.wake)}` : ''].filter(Boolean).join(' · ')}
+          </span>
+          {total > 0 && (
+            <span className="sleep-stages" aria-hidden>
+              {STAGES.map(([k, col]) => ((night[k] as number | undefined) ? <i key={k} style={{ flex: night[k] as number, background: col }} /> : null))}
+            </span>
+          )}
+        </span>
+        <span className="flex shrink-0 flex-col items-end gap-0.5">
+          <span className="num text-base font-bold">+{score}</span>
+          {bells > 0 && <span className="sleep-bells">{bells === 2 ? '🔔🔔' : '🔔'}</span>}
+        </span>
       </div>
     )
   }
   return (
-    <button type="button" onClick={onToggle} className="flex min-w-0 flex-1 items-center gap-3 py-2 text-left" title="Your band has not reported last night yet. Tick it by hand for less; the reading replaces the tick when it arrives.">
-      <Moon />
+    <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Filled by your band's reading of the night. A night with no reading is never a miss.">
+      <span className="sleep-ring waiting" aria-hidden><Moon /></span>
       <span className="min-w-0 flex-1">
-        <span className={`vit-title block truncate ${ticked ? 'line-through opacity-80' : ''}`}>{name}</span>
-        <span className="block truncate text-[11px] font-bold opacity-80">{ticked ? 'Ticked by hand · the reading will replace it' : 'Waiting for last night\'s reading · tap to tick by hand'}</span>
+        <span className="vit-title block truncate">{name}</span>
+        <span className="block truncate text-[11px] font-bold opacity-80">{state === 'waiting' ? 'Waiting for last night\'s reading · it fills when the band syncs' : 'Filled by your band\'s reading of the night'}</span>
       </span>
-      <span className="num shrink-0 text-base font-bold">{ticked ? `+${selfXp}` : selfXp}</span>
-    </button>
+      <span className="num shrink-0 text-sm font-bold opacity-70">0 to 100</span>
+    </div>
   )
 }
 
