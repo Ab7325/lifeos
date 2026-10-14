@@ -108,12 +108,14 @@ export const WEAK_MULT = 1.5
 /** If the partner's type is super effective against the leader's, everything hits this much harder. */
 export const ADVANTAGE_MULT = 1.2
 /**
- * A party of six: the partner and up to this many Pokemon standing behind it. Every strike gets +TEAM_BONUS for each of them, and
+ * A party of six: the partner and up to this many fully trained Pokemon standing behind it. Every strike gets +TEAM_BONUS for each of them, and
  * +TEAM_NATURE more on the kind of work that member's nature raised. All the strike bonuses are added together, then applied once.
- * Any Pokemon you own can stand there (from TEAM_OPEN_FROM), but only fully trained ones count towards the boss's "party of six".
  */
 export const TEAM_SIZE = 5
-/** From this day a Pokemon in "My Pokemon" can be put on the team, and one nobody chose a place for fills a free place by itself. Earlier days fold exactly as they did. */
+/**
+ * From this day any Pokemon you own can stand on the team, not only a fully trained one, and a place nobody chose fills itself with the oldest in
+ * My Pokemon. Only the fully trained ones count towards the boss's party of six (the rest still add to every strike). Earlier days fold as they always did.
+ */
 export const TEAM_OPEN_FROM = '2026-10-14'
 export const TEAM_BONUS = 0.02
 export const TEAM_NATURE = 0.03
