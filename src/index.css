@@ -300,47 +300,23 @@ body {
   .shed-item { grid-template-columns: 1fr 250px; align-items: center; }
 }
 
-/* Partner: the game's one card. A dark field so the sprite reads, a cream plate for the numbers */
-.pillar-mark { display: inline-grid; place-items: center; flex: none; width: 26px; height: 30px; margin-right: 2px; background: #ffd800; color: #111; border: 2px solid #111; border-radius: 3px; box-shadow: 2px 2px 0 0 #111; }
-.partner-card {
-  display: flex; align-items: center; gap: 14px; padding: 12px;
-  background: #1d2433; color: #f4f1e6;
-  border: 3px solid var(--color-neo-black); border-radius: 8px;
-  box-shadow: 4px 4px 0 0 var(--color-neo-black);
-}
-.partner-card.aura-mega { box-shadow: 4px 4px 0 0 var(--color-neo-black), inset 0 0 0 3px #7ad7ff; }
-.partner-card.aura-gmax { box-shadow: 4px 4px 0 0 var(--color-neo-black), inset 0 0 0 3px #ff5d8f; }
-.partner-frame {
-  position: relative; flex: none; display: grid; place-items: center; width: 96px; height: 96px;
-  background: radial-gradient(circle at 50% 78%, #3d4a66 0 34%, #2a3349 35% 100%);
-  border: 3px solid var(--color-neo-black); border-radius: 6px;
-}
+/* Sprites from the Pokedex site (the partner card, the foes, the toasts) */
 .partner-sprite { image-rendering: pixelated; object-fit: contain; }
 .partner-sprite.is-asleep { filter: grayscale(1) brightness(0.7); }
-.partner-blank { display: grid; place-items: center; background: #3d4a66; color: #9aa6c2; font-family: 'Silkscreen', monospace; border-radius: 4px; }
-.partner-zzz { position: absolute; top: 4px; right: 6px; font-family: 'Silkscreen', monospace; font-size: 10px; color: #9aa6c2; }
-.partner-name { font-family: 'Silkscreen', monospace; font-weight: 700; font-size: 17px; letter-spacing: 0.04em; text-transform: uppercase; color: #ffd800; }
-.partner-lv { font-family: 'Silkscreen', monospace; font-size: 13px; color: #f4f1e6; }
-.partner-tag { font-family: 'Silkscreen', monospace; font-size: 10px; padding: 1px 5px; border: 2px solid #ffd800; color: #ffd800; text-transform: uppercase; }
-.partner-bar { display: flex; height: 12px; margin: 7px 0 6px; background: #0f1420; border: 2px solid var(--color-neo-black); overflow: hidden; }
-.partner-bar i { display: block; height: 100%; flex: none; }
-.partner-bar .bar-base { background: #34d399; }
-/* today's XP: a different hue and a stripe, so it reads without relying on colour alone */
-.partner-bar .bar-today { background: #ffd800 repeating-linear-gradient(135deg, transparent 0 4px, rgba(0,0,0,0.28) 4px 6px); }
-.partner-line { font-size: 12px; line-height: 1.45; color: #b9c2d6; }
-.partner-line b { color: #f4f1e6; font-variant-numeric: tabular-nums; }
-.partner-line b.partner-today { color: #ffd800; }
+.partner-blank { display: grid; place-items: center; background: #3d4a66; color: #9aa6c2; font-family: 'Lilita One', sans-serif; border-radius: 4px; }
+.partner-zzz { position: absolute; top: 2px; right: 0; font-family: 'Lilita One', sans-serif; font-size: 12px; color: #aab6e6; }
 
-/* Moments: one line, said once, above the tab bar */
-.moment-wrap { position: fixed; left: 0; right: 0; bottom: 88px; z-index: 60; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
+/* Moments: one line, said once, above the tab bar. The same night screen as the partner card */
+.moment-wrap { position: fixed; left: 0; right: 0; bottom: 96px; z-index: 60; display: flex; justify-content: center; padding: 0 16px; pointer-events: none; }
 .moment {
   pointer-events: auto; display: flex; align-items: center; gap: 12px; max-width: 420px; width: 100%; padding: 10px 14px;
-  background: #1d2433; color: #f4f1e6; border: 3px solid var(--color-neo-black); border-radius: 8px;
-  box-shadow: 4px 4px 0 0 var(--color-neo-black);
+  color: #f4f6ff; background: radial-gradient(420px 160px at 30% -40%, #2c3a7d 0, transparent 70%), linear-gradient(#1a2152, #11163a);
+  border: 3px solid var(--color-neo-black); border-radius: 14px; box-shadow: 5px 5px 0 0 var(--color-neo-black);
 }
-.moment-evolve, .moment-catch, .moment-graduate, .moment-form { box-shadow: 4px 4px 0 0 var(--color-neo-black), inset 0 0 0 3px #ffd800; }
-.moment-title { display: block; font-family: 'Silkscreen', monospace; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #ffd800; }
-.moment-text { display: block; font-size: 13px; line-height: 1.35; }
+.moment-evolve, .moment-catch, .moment-graduate, .moment-form, .moment-gym, .moment-league, .moment-key, .moment-mega { box-shadow: 5px 5px 0 0 var(--color-neo-black), inset 0 0 0 2px #ffc93a, 0 0 28px rgba(255, 200, 40, 0.35); }
+.moment-quest { box-shadow: 5px 5px 0 0 var(--color-neo-black), inset 0 0 0 2px #45d483; }
+.moment-title { display: block; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 18px; letter-spacing: 0.02em; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4); }
+.moment-text { display: block; font-size: 13px; line-height: 1.35; color: #c9d2f5; }
 
 /* Sunday reset: a lavender sticker sheet with a dashed cut-line, its title stamped on at a slant */
 .sunday-panel {
@@ -373,43 +349,6 @@ body {
   .tile-strong::before, .tile-arbor { animation: none; }
 }
 
-/* The partner strip and its toasts, in the Pokedex look: a pale frame around a dark quilted body,
-   one heavy outlined face, a bar that is an object. Only the game's part of this app is styled this way. */
-.partner-card {
-  gap: 14px; padding: 12px 14px; color: #fff; border: 3px solid #141a33; border-radius: 16px;
-  background-color: #26315e;
-  background-image: linear-gradient(45deg, rgba(255,255,255,0.035) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.035) 75%), linear-gradient(-45deg, rgba(0,0,0,0.07) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.07) 75%);
-  background-size: 44px 44px;
-  box-shadow: 0 0 0 5px #f8f5ea, 0 0 0 8px #141a33, 0 13px 0 0 #141a33;
-  margin: 8px 8px 16px;
-}
-.partner-card.aura-mega { box-shadow: 0 0 0 5px #7fe3ff, 0 0 0 8px #141a33, 0 13px 0 0 #141a33; }
-.partner-card.aura-gmax { box-shadow: 0 0 0 5px #e0559a, 0 0 0 8px #141a33, 0 13px 0 0 #141a33; }
-/* no frame: the sprite stands on a soft shadow */
-.partner-frame { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; margin: 0 4px; width: 90px; height: 90px; }
-.partner-frame::after { content: ''; position: absolute; left: 16%; right: 16%; bottom: 4px; height: 10px; border-radius: 50%; background: rgba(0, 0, 0, 0.32); }
-.partner-frame .partner-sprite { position: relative; z-index: 1; }
-.partner-name { font-family: 'Lilita One', 'Silkscreen', sans-serif; font-weight: 400; font-size: 24px; letter-spacing: 0.02em; text-transform: none; color: #fff; -webkit-text-stroke: 4px #141a33; paint-order: stroke fill; text-shadow: 0 2px 0 #141a33; }
-.partner-lv { font-family: 'Lilita One', 'Silkscreen', sans-serif; font-size: 17px; color: #ffd84a; -webkit-text-stroke: 3px #141a33; paint-order: stroke fill; }
-.partner-tag { font-family: 'Lilita One', sans-serif; font-size: 12px; text-transform: none; color: #141a33; background: #f5b800; border: 2px solid #141a33; border-radius: 6px; padding: 0 6px 2px; }
-.partner-bar { height: 20px; margin: 6px 0 7px; background: #0c1126; border: 2px solid #141a33; border-radius: 8px; box-shadow: inset 0 3px 0 rgba(0,0,0,0.5); }
-.partner-bar i { box-shadow: inset 0 5px 0 rgba(255,255,255,0.38), inset 0 -4px 0 rgba(0,0,0,0.2); }
-.partner-bar .bar-base { background: #2f7fd0; }
-.partner-bar .bar-today { background: #f5b800 repeating-linear-gradient(135deg, transparent 0 4px, rgba(0,0,0,0.28) 4px 6px); }
-.partner-line { color: #aab6e6; }
-.partner-line b { color: #fff; } .partner-line b.partner-today { color: #ffd84a; }
-.partner-zzz, .partner-blank { font-family: 'Lilita One', sans-serif; }
-.moment { color: #fff; background: #26315e; border: 3px solid #141a33; border-radius: 16px; box-shadow: 0 0 0 4px #f8f5ea, 0 0 0 7px #141a33, 0 12px 0 0 #141a33; }
-.moment-evolve, .moment-catch, .moment-graduate, .moment-form, .moment-gym, .moment-league, .moment-key, .moment-mega { box-shadow: 0 0 0 4px #f5b800, 0 0 0 7px #141a33, 0 12px 0 0 #141a33; }
-.moment-title { font-family: 'Lilita One', 'Silkscreen', sans-serif; font-weight: 400; font-size: 18px; text-transform: none; letter-spacing: 0.02em; color: #fff; -webkit-text-stroke: 3px #141a33; paint-order: stroke fill; }
-.moment-text { color: #dfe6ff; }
-
-/* version 5: the wallet on the strip */
-.partner-wallet { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: 'Lilita One', sans-serif; font-size: 16px; color: #fff; }
-.partner-wallet i { display: inline-block; width: 16px; height: 16px; border: 2px solid #141a33; }
-.partner-wallet .coin { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffd84a 0 45%, #f5b800 46%); }
-.partner-wallet .gem { margin-left: 8px; background: #3fd07a; clip-path: polygon(25% 0, 75% 0, 100% 40%, 50% 100%, 0 40%); border: 0; width: 17px; }
-.moment-quest { box-shadow: 0 0 0 4px #2fae66, 0 0 0 7px #141a33, 0 12px 0 0 #141a33; }
 
 /* The moments worth stopping for (a catch, an evolution, a badge, a hatch...) are staged where you ticked:
    in the middle of the screen, the sprite large with rays turning behind it. A tap sends it away; it leaves by itself too. */
@@ -420,7 +359,7 @@ body {
 .moment-big .moment-art { width: 150px; height: 130px; }
 .moment-big .moment-art::before { content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%; background: repeating-conic-gradient(rgba(255, 216, 74, 0.3) 0 10deg, transparent 10deg 20deg); mask-image: radial-gradient(circle, #000 0 28%, transparent 66%); animation: moment-spin 12s linear infinite; }
 .moment-big .moment-art > * { position: relative; animation: moment-pop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) both; filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.35)); }
-.moment-big .moment-title { font-size: 26px; -webkit-text-stroke-width: 4px; }
+.moment-big .moment-title { font-size: 26px; }
 .moment-big .moment-text { font-size: 15px; }
 @keyframes moment-spin { to { transform: rotate(360deg); } }
 @keyframes moment-pop { 0% { transform: scale(0.2) rotate(-14deg); opacity: 0; } 60% { transform: scale(1.2); } }
@@ -466,3 +405,245 @@ body {
 .flame.t3 i { width: 15px; height: 20px; animation-duration: 0.6s; }
 @keyframes flicker { from { transform: scale(1, 1) rotate(-3deg); } to { transform: scale(0.92, 1.1) rotate(3deg); } }
 @media (prefers-reduced-motion: reduce) { .review-shard, .flame i { animation: none; } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   The partner card: the Pokedex's own look (UI-REVIEW.md there), a night
+   screen set into this page's brutalist frame. Inside it, content stands on
+   the screen: hairlines, not boxes; only what you press has depth; each kind
+   of work has one colour everywhere (code blue, gym red, guitar orange,
+   Arbor green, sleep violet, chores gold).
+   ════════════════════════════════════════════════════════════════════════ */
+:root {
+  --dex-ground: #11163a;
+  --dex-ground-lo: #0b0f28;
+  --dex-well: rgba(4, 7, 22, 0.55);
+  --dex-hair: rgba(255, 255, 255, 0.09);
+  --dex-hair-hi: rgba(255, 255, 255, 0.18);
+  --dex-text: #f4f6ff;
+  --dex-text-2: #aab6e6;
+  --dex-text-3: #7d88b8;
+  --dex-gold: #ffc93a;
+  --dex-gold-glow: rgba(255, 200, 40, 0.45);
+  --tag-code: #5aa8ff; --tag-fitness: #ff5a64; --tag-guitar: #ff9a3c;
+  --tag-arbor: #45d483; --tag-sleep: #a98bff; --tag-routine: #ffc93a;
+}
+/* the default colour sits at zero specificity so a data-tag on the same element always wins */
+:where(.tile-pillar, .dex-pillar, .day-chip, .rank-row, .matrix-pillar) { --c: var(--tag-routine); }
+[data-tag='code'] { --c: var(--tag-code); }
+[data-tag='fitness'] { --c: var(--tag-fitness); }
+[data-tag='guitar'] { --c: var(--tag-guitar); }
+[data-tag='arbor'] { --c: var(--tag-arbor); }
+[data-tag='sleep'] { --c: var(--tag-sleep); }
+[data-tag='routine'] { --c: var(--tag-routine); }
+
+.dex-card {
+  position: relative; display: grid; gap: 12px; padding: 14px 14px 12px; color: var(--dex-text); overflow: hidden;
+  background:
+    radial-gradient(520px 260px at 18% -90px, #2c3a7d 0, transparent 70%),
+    radial-gradient(380px 260px at 115% 30%, rgba(110, 80, 220, 0.2), transparent 70%),
+    linear-gradient(var(--dex-ground), var(--dex-ground-lo));
+  border: 3px solid var(--color-neo-black); border-radius: 14px; box-shadow: 6px 6px 0 0 var(--color-neo-black);
+}
+.dex-card.aura-mega { box-shadow: 6px 6px 0 0 var(--color-neo-black), inset 0 0 0 2px #7fe3ff, inset 0 0 40px rgba(127, 227, 255, 0.25); }
+.dex-card.aura-gmax { box-shadow: 6px 6px 0 0 var(--color-neo-black), inset 0 0 0 2px #e0559a, inset 0 0 40px rgba(224, 85, 154, 0.25); }
+.dex-pix { image-rendering: pixelated; flex: none; }
+
+.dex-top { display: flex; align-items: center; gap: 12px; }
+/* the partner stands on a lit plinth, no frame */
+.dex-hero { position: relative; flex: none; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 50% 62%, rgba(255, 255, 255, 0.12) 0 38%, transparent 62%); }
+.dex-hero::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: 8px; height: 10px; border-radius: 50%; background: rgba(0, 0, 0, 0.45); }
+.dex-hero .partner-sprite { position: relative; z-index: 1; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3)); transition: transform 0.25s cubic-bezier(0.2, 1.6, 0.4, 1); }
+.dex-hero:hover .partner-sprite, .dex-hero:active .partner-sprite { transform: translateY(-4px) scale(1.06); }
+.dex-name-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.dex-name { font-family: 'Lilita One', sans-serif; font-size: 24px; line-height: 1.05; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45); }
+.dex-lv { font-family: 'Lilita One', sans-serif; font-size: 16px; color: var(--dex-gold); }
+.dex-chip { align-self: center; font-family: 'Lilita One', sans-serif; font-size: 12px; line-height: 1; padding: 3px 7px 4px; border-radius: 999px; color: #1a1200; background: var(--dex-gold); }
+.dex-chip.is-mega { background: #7fe3ff; }
+.dex-chip.is-gmax { background: #e0559a; color: #fff; }
+.dex-say { margin: 3px 0 7px; font-family: 'Lilita One', sans-serif; font-size: 16px; line-height: 1.2; color: var(--dex-text); }
+.dex-say em { font-style: normal; color: var(--dex-gold); }
+.dex-xp { display: flex; height: 12px; background: var(--dex-well); border-radius: 99px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--dex-hair-hi); }
+.dex-xp i { display: block; height: 100%; flex: none; }
+.dex-xp .bar-base { background: linear-gradient(#6fb6ff, #2f7fd0); }
+/* today's XP: a different hue and a stripe, so it reads without relying on colour alone */
+.dex-xp .bar-today { background: linear-gradient(#ffe27a, #f5b800) ; background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(0, 0, 0, 0.22) 4px 6px), linear-gradient(#ffe27a, #f5b800); box-shadow: 0 0 10px var(--dex-gold-glow); }
+.dex-sub { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; margin-top: 5px; font-size: 12px; line-height: 1.3; color: var(--dex-text-2); }
+.dex-sub b { color: var(--dex-text); font-weight: 700; }
+
+/* coins, gems and what waits to be collected: small pills on a well */
+.dex-wallet { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.dex-pill { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px 0 6px; border-radius: 999px; background: var(--dex-well); box-shadow: inset 0 0 0 1px var(--dex-hair); font-family: 'Lilita One', sans-serif; font-size: 15px; }
+.dex-pill b { font-family: 'Lilita One', sans-serif; font-weight: 400; color: #fff; }
+.dex-pill small { font-size: 12px; color: var(--dex-gold); }
+.dex-collect { margin-left: auto; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; font-family: 'Lilita One', sans-serif; font-size: 14px; text-decoration: none; color: #1a1200; background: radial-gradient(circle at 50% 30%, #ffe27a, #f5b800); box-shadow: 0 0 16px var(--dex-gold-glow), 0 3px 0 rgba(0, 0, 0, 0.4); }
+.dex-collect.is-empty { color: var(--dex-text-3); background: none; box-shadow: none; font-size: 13px; padding: 0 2px; animation: none; }
+
+/* the pillars: a ring each that fills in its own colour, the mark it pays in the middle. Tap one to find its row */
+.dex-pillars { list-style: none; margin: 0; padding: 12px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px; border-top: 1px solid var(--dex-hair); }
+.dex-pillar { width: 100%; display: grid; justify-items: center; gap: 1px; padding: 2px 0 4px; text-align: center; color: inherit; border-radius: 12px; transition: background 0.13s linear; }
+.dex-pillar:hover { background: rgba(255, 255, 255, 0.05); }
+.dex-pillar:active .dex-ring { transform: scale(0.94); }
+.dex-ring { position: relative; width: 54px; height: 54px; margin-bottom: 4px; display: grid; place-items: center; border-radius: 50%; transition: transform 0.13s ease-out;
+  background: radial-gradient(circle, var(--dex-ground) 0 20px, transparent 21px), conic-gradient(var(--c) calc(var(--p, 0) * 1turn), rgba(255, 255, 255, 0.1) 0); }
+.dex-ring > img, .dex-ring > span { position: relative; opacity: 0.5; filter: grayscale(0.6); transition: opacity 0.25s linear, filter 0.25s linear; }
+.dex-pillar.part .dex-ring > img, .dex-pillar.part .dex-ring > span { opacity: 0.9; filter: none; }
+.dex-pillar.done .dex-ring { background: radial-gradient(circle, color-mix(in srgb, var(--c) 30%, var(--dex-ground)) 0 20px, transparent 21px), var(--c); box-shadow: 0 0 16px color-mix(in srgb, var(--c) 55%, transparent); }
+.dex-pillar.done .dex-ring > img, .dex-pillar.done .dex-ring > span { opacity: 1; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35)); }
+.dex-tick { position: absolute; right: -3px; bottom: -3px; width: 20px; height: 20px; border-radius: 50%; background: var(--c); border: 2px solid var(--dex-ground); }
+.dex-tick::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+.dex-pillar b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 14px; color: var(--dex-text); padding: 0 2px; }
+.dex-pillar small { font-size: 11px; color: var(--dex-text-2); }
+.dex-pillar.done small { color: var(--c); font-weight: 700; }
+
+/* the pace: the week's momentum as seven dots and today */
+.dex-pace { display: flex; align-items: stretch; padding: 10px 0; border-top: 1px solid var(--dex-hair); border-bottom: 1px solid var(--dex-hair); }
+.dex-pace-cell { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0 4px; }
+.dex-pace-cell:first-child { flex: 1; }
+.dex-pace-cell + .dex-pace-cell { padding-left: 12px; margin-left: 8px; border-left: 1px solid var(--dex-hair); }
+.dex-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dex-text-3); }
+.dex-week { display: flex; align-items: center; gap: 5px; }
+.dex-week i { width: 11px; height: 11px; border-radius: 50%; background: var(--dex-well); box-shadow: inset 0 0 0 1px var(--dex-hair-hi); }
+.dex-week i.on { background: var(--dex-gold); box-shadow: 0 0 8px var(--dex-gold-glow); }
+.dex-week i.off { background: rgba(255, 90, 100, 0.35); box-shadow: none; }
+.dex-week i.none { opacity: 0.3; }
+.dex-week i.now { width: 15px; height: 15px; margin-left: 3px; box-shadow: inset 0 0 0 2px #fff; }
+.dex-week i.now.on { box-shadow: 0 0 0 2px #fff, 0 0 10px var(--dex-gold-glow); }
+.dex-mult { margin-left: auto; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 20px; color: #fff; }
+.dex-pace .flame { margin-left: auto; font-family: 'Lilita One', sans-serif; font-size: 20px; }
+.dex-pace .flame b { font-weight: 400; color: var(--dex-gold); }
+
+/* what today wears down: the wild Pokemon, the leader, the boss */
+.dex-foes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.dex-foe { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 10px 7px 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.045); box-shadow: inset 0 0 0 1px var(--dex-hair); }
+.dex-foe.is-boss { background: radial-gradient(160px 80px at 0 50%, rgba(255, 90, 100, 0.18), transparent 70%), rgba(255, 255, 255, 0.045); box-shadow: inset 0 0 0 1px rgba(255, 90, 100, 0.35); }
+.dex-foe-art { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--dex-well); }
+.dex-foe-art.is-badge { color: var(--dex-gold); font-size: 18px; }
+.dex-foe-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Lilita One', sans-serif; font-size: 14px; line-height: 1.2; color: var(--dex-text); }
+.dex-foe-line { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--dex-text-2); }
+.dex-hp { display: block; height: 6px; margin: 3px 0 2px; border-radius: 99px; background: var(--dex-well); overflow: hidden; }
+.dex-hp i { display: block; height: 100%; border-radius: inherit; background: #3fd07a; transition: width 0.7s cubic-bezier(0.16, 0.84, 0.3, 1); }
+.dex-hp.mid i { background: #f5c400; }
+.dex-hp.low i { background: #ee4b3e; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   A pillar no app feeds (LeetCode, and any pillar added later): an ink slab
+   charged in its kind of work's colour. The charge bar along the bottom runs
+   while it waits and is full once it is done. The build is the badge.
+   ════════════════════════════════════════════════════════════════════════ */
+.tile-pillar {
+  position: relative; overflow: hidden; color: #fff;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--c) 22%, #111) 0, #111 55%);
+  border-color: #111; border-radius: 10px;
+  box-shadow: 4px 4px 0 0 #111, inset 5px 0 0 0 var(--c);
+  padding-bottom: 9px !important;
+}
+.tile-pillar::before { content: ''; position: absolute; left: 5px; right: 0; bottom: 0; height: 6px; background: rgba(255, 255, 255, 0.1); }
+.tile-pillar::after {
+  content: ''; position: absolute; left: 5px; right: 0; bottom: 0; height: 6px;
+  background: linear-gradient(90deg, transparent 0, var(--c) 45%, #fff 50%, var(--c) 55%, transparent 100%) no-repeat;
+  background-size: 40% 100%; animation: pillar-charge 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+.tile-pillar:hover, .tile-pillar:active { box-shadow: 1px 1px 0 0 #111, inset 5px 0 0 0 var(--c); }
+.tile-pillar.is-done { color: #111; background: var(--c); box-shadow: 4px 4px 0 0 #111, inset 5px 0 0 0 #111; }
+.tile-pillar.is-done::after { animation: pillar-fill 0.6s cubic-bezier(0.16, 0.84, 0.3, 1) both; background: #111; background-size: 100% 100%; }
+.tile-pillar.is-done::before { background: rgba(0, 0, 0, 0.15); }
+.tile-pillar > button:last-child { color: rgba(255, 255, 255, 0.55); }
+.tile-pillar.is-done > button:last-child { color: rgba(0, 0, 0, 0.5); }
+.tile-pillar .text-black\/50 { color: rgba(255, 255, 255, 0.5); }
+.tile-pillar.is-done .text-black\/50 { color: rgba(0, 0, 0, 0.5); }
+.pillar-key { flex: none; display: grid; place-items: center; width: 38px; height: 38px; margin-left: 4px; font-size: 20px; line-height: 1; font-weight: 900; color: #111; background: var(--c); border: 2px solid #111; border-radius: 8px; box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.45); }
+.tile-pillar.is-done .pillar-key { background: #111; color: var(--c); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15); }
+.pillar-title { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 18px; line-height: 1.1; letter-spacing: 0.03em; text-transform: uppercase; }
+.tile-pillar.is-done .pillar-title { text-decoration: line-through; text-decoration-thickness: 3px; }
+.pillar-line { margin-top: 2px; font-size: 11px; font-weight: 700; color: color-mix(in srgb, var(--c) 70%, #fff); }
+.tile-pillar.is-done .pillar-line { color: rgba(0, 0, 0, 0.7); }
+.pillar-run { display: inline-block; width: 8px; height: 11px; margin-right: 4px; vertical-align: -1px; background: linear-gradient(#ffd800 0 35%, #ff7b00 35% 70%, #ff3a3a 70%); clip-path: polygon(50% 0, 70% 28%, 92% 50%, 82% 88%, 50% 100%, 18% 88%, 8% 50%, 30% 28%); }
+.pillar-xp { font-size: 18px; font-weight: 800; }
+@keyframes pillar-charge { 0% { background-position: -60% 0; } 100% { background-position: 160% 0; } }
+@keyframes pillar-fill { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
+
+/* a ring in the card was tapped: its row says "here" */
+.row-call > div:first-child { animation: row-call 1.3s ease-out; }
+@keyframes row-call { 0%, 40% { outline: 4px solid var(--color-neo-yellow); outline-offset: 3px; } 100% { outline: 4px solid transparent; outline-offset: 8px; } }
+
+/* ── Today: a heading and a bar with one cell per habit, pillars in their colour ── */
+.today-head { display: grid; gap: 8px; }
+.today-title { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 22px; line-height: 1; letter-spacing: 0.04em; text-transform: uppercase; }
+.day-track { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 3px; height: 26px; padding: 3px; background: #fff; border: 3px solid #111; border-radius: 6px; box-shadow: 3px 3px 0 0 #111; }
+.day-track i { display: block; border-radius: 2px; background: rgba(0, 0, 0, 0.08); transition: background 0.25s linear; }
+.day-track i.is-pillar { background: rgba(0, 0, 0, 0.06); box-shadow: inset 0 -4px 0 var(--c, #111); }
+.day-track i.on { background: var(--color-neo-green); }
+.day-track i.on.is-pillar { background: var(--c, #111); box-shadow: none; }
+.day-caption { font-size: 11px; font-weight: 700; color: var(--color-neo-gray-dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-pillar::after, .tile-pillar.is-done::after, .row-call > div:first-child { animation: none; }
+  .tile-pillar::after { background: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Monthly: one green, darker as a day was fuller, the same in the calendar,
+   the bars and the ranking. A perfect day is the deepest and wears a star.
+   ════════════════════════════════════════════════════════════════════════ */
+.heat-0 { background: #ffffff; }
+.heat-1 { background: #d8f6e8; }
+.heat-2 { background: #a9ecce; }
+.heat-3 { background: #6edcb0; }
+.heat-4 { background: #34d399; }
+.heat-5 { background: #0fa36f; color: #fff; }
+.heat-none { background: repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.06) 0 4px, transparent 4px 8px), #f4f4f0; }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cal-dow { padding-bottom: 2px; text-align: center; font-size: 10px; font-weight: 800; color: var(--color-neo-gray-dark); }
+.cal-day {
+  position: relative; aspect-ratio: 1; min-height: 38px; display: flex; flex-direction: column; justify-content: space-between; padding: 3px 4px;
+  border: 2px solid #111; border-radius: 6px; text-align: left; box-shadow: 2px 2px 0 0 #111;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.cal-day:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 0 #111; }
+.cal-day:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 #111; }
+.cal-day.is-future { background: transparent; border-style: dashed; border-color: rgba(0, 0, 0, 0.25); box-shadow: none; color: rgba(0, 0, 0, 0.35); }
+.cal-day.is-today { box-shadow: 2px 2px 0 0 #111, inset 0 0 0 3px var(--color-neo-yellow); }
+.cal-day.is-sel { outline: 3px solid #111; outline-offset: 2px; z-index: 1; }
+.cal-n { font-size: 11px; font-weight: 800; line-height: 1; }
+.cal-p { align-self: flex-end; font-size: 10px; font-weight: 700; line-height: 1; opacity: 0.75; }
+.heat-5 .cal-p { opacity: 1; color: #ffd800; font-size: 12px; text-shadow: 0 1px 0 #111; }
+
+.day-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; font-size: 12px; font-weight: 700; border: 2px solid #111; border-radius: 999px; }
+.day-chip.is-done { background: var(--color-neo-green); }
+.day-chip.is-missed { background: #fff; color: rgba(0, 0, 0, 0.75); }
+.day-chip.is-pillar { font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; box-shadow: inset 4px 0 0 var(--c, #111); padding-left: 10px; }
+.day-chip.is-missed.is-pillar { background: color-mix(in srgb, var(--c, #ff3a3a) 15%, #fff); color: #111; }
+
+.rank-row { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; }
+.rank-row:nth-child(odd) { background: rgba(0, 0, 0, 0.03); }
+.rank-row.is-pillar { box-shadow: inset 4px 0 0 var(--c, #111); padding-left: 10px; }
+.rank-track { display: block; height: 8px; margin-top: 3px; background: rgba(0, 0, 0, 0.06); border: 1.5px solid #111; border-radius: 99px; overflow: hidden; }
+.rank-track i { display: block; height: 100%; border-right: 1.5px solid #111; }
+
+/* the month's average, a dashed line across the bars */
+.avg-line { position: absolute; left: 0; right: 0; z-index: 2; border-top: 2px dashed rgba(0, 0, 0, 0.55); pointer-events: none; }
+
+.matrix-pillar { box-shadow: inset 4px 0 0 var(--c, #111), 2px 0 4px rgba(0, 0, 0, 0.05) !important; padding-left: 10px !important; font-weight: 800; }
+
+/* ── the header: one line on a phone. The name as a stamp, the day, and whether sync is live ── */
+.app-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 4px solid #111; }
+.app-logo { flex: none; padding: 3px 10px 4px; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 20px; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neo-yellow); background: #111; border-radius: 4px; box-shadow: 3px 3px 0 0 var(--color-neo-blue); transform: rotate(-1.5deg); }
+.app-date { margin-left: auto; text-align: right; line-height: 1.1; }
+.app-date b { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.app-date span { display: block; font-size: 12px; font-weight: 700; color: var(--color-neo-gray-dark); }
+.sync-dot { flex: none; width: 14px; height: 14px; border: 2.5px solid #111; border-radius: 50%; background: var(--color-neo-gray); }
+.sync-dot.is-live { background: var(--color-neo-green); }
+.sync-dot.is-connecting { background: var(--color-neo-yellow); animation: sync-blink 1s steps(2, end) infinite; }
+.sync-dot.is-error { background: var(--color-neo-red); }
+@keyframes sync-blink { 50% { background: #fff; } }
+
+/* ── the tab bar: a floating brutalist dock; the open tab is a raised yellow key ── */
+.dock { position: fixed; left: 50%; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 40; translate: -50% 0; width: min(420px, calc(100% - 24px)); display: flex; gap: 6px; padding: 6px; background: #fff; border: 3px solid #111; border-radius: 16px; box-shadow: 5px 5px 0 0 #111; }
+.dock button { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-neo-gray-dark); }
+.dock button .dock-ic { font-size: 18px; filter: grayscale(1); opacity: 0.5; }
+.dock button[aria-current='page'] { color: #111; }
+.dock button[aria-current='page'] .dock-ic { filter: drop-shadow(1px 1px 0 #111); opacity: 1; }
+.dock-key { position: absolute; inset: 0; z-index: -1; background: var(--color-neo-yellow); border: 2.5px solid #111; border-radius: 10px; box-shadow: 2px 2px 0 0 #111; }
+.dock button > span:not(.dock-key) { position: relative; }
+@media (prefers-reduced-motion: reduce) { .sync-dot.is-connecting { animation: none; } }

@@ -334,3 +334,26 @@ export function SleepTile({ name, state, night, ticked, selfXp, onToggle }: { na
     </button>
   )
 }
+
+// ── Pillars with no app of their own (LeetCode, and any pillar added later) ──
+/**
+ * The default look for a pillar that no other app feeds: an ink slab charged in
+ * its kind of work's colour. A bar along the bottom runs while it is waiting and
+ * fills when it is done, and the line under the name is the run it is on. Being
+ * built differently from an ordinary row is what says "pillar"; it needs no badge.
+ */
+export function PillarTile({ name, emoji, xp, ticked, run, onToggle, xpRef }: { name: string; emoji: string; xp: number; ticked: boolean; run: number; onToggle: () => void; xpRef?: React.Ref<HTMLSpanElement> }) {
+  const line = ticked
+    ? run > 1 ? `Done · ${run} days running` : 'Done · a run starts today'
+    : run > 0 ? `${run}-day run · keep it going` : 'Start a run today'
+  return (
+    <button type="button" onClick={onToggle} aria-pressed={ticked} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 text-left">
+      <span className="pillar-key" aria-hidden>{ticked ? '✓' : emoji}</span>
+      <span className="min-w-0 flex-1">
+        <span className="pillar-title block truncate">{name}</span>
+        <span className="pillar-line block truncate">{run > 1 && <i className="pillar-run" aria-hidden />}{line}</span>
+      </span>
+      <span ref={xpRef} className="pillar-xp num shrink-0">{ticked ? `+${xp}` : xp}</span>
+    </button>
+  )
+}

@@ -239,7 +239,7 @@ export default function App() {
   }
 
   const link = useGameLink()
-  const game = useGame(habits, ticks, arbor, shed, link, today)
+  const { game, todayFacts } = useGame(habits, ticks, arbor, shed, link, today)
 
   // Record today's habit list, with each habit's tier and domain, so editing
   // or deleting a habit cannot change what a day was. From rules version 4 the
@@ -288,6 +288,12 @@ export default function App() {
     })
     if (wasTicked) cloud.emit('untick', { habitId })
     else cloud.emit('tick', { habitId, at })
+    // a tick is felt on a phone: a short double tap in, a single soft one out
+    try {
+      navigator.vibrate?.(wasTicked ? 8 : [14, 40, 22])
+    } catch {
+      /* no vibration here */
+    }
   }
 
   // ── not-every-day blocks: month-end review + Sunday reset ──
@@ -345,11 +351,9 @@ export default function App() {
     },
   }
 
-  const dateLabel = new Date().toLocaleDateString('en-IN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
+  const syncLabel =
+    (cloud.status === 'live' ? 'Cloud sync live' : cloud.status === 'connecting' ? 'Connecting to the cloud…' : cloud.status === 'error' ? 'Sync error: saved on this device' : 'Cloud sync off: saved on this device') +
+    (cloud.pending > 0 ? ` · ${cloud.pending} waiting to send` : '')
 
   return (
     <div
@@ -359,11 +363,18 @@ export default function App() {
           : 'max-w-md sm:max-w-2xl lg:max-w-4xl'
       }`}
     >
-      <header className="mb-6 flex items-baseline justify-between border-b-4 border-black pb-2">
-        <h1 className="font-display text-xl font-bold uppercase tracking-widest text-black">
-          LifeOS<span className="ml-1.5 text-neo-blue">// TRACKER</span>
-        </h1>
-        <span className="num text-sm font-bold text-black">{dateLabel}</span>
+      <header className="app-head">
+        <h1 className="app-logo">LifeOS</h1>
+        <div className="app-date">
+          <b>{new Date().toLocaleDateString('en-IN', { weekday: 'long' })}</b>
+          <span>{new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        </div>
+        <span
+          className={`sync-dot is-${cloud.status}`}
+          role="img"
+          aria-label={syncLabel}
+          title={syncLabel}
+        />
       </header>
 
       <motion.main
@@ -380,6 +391,7 @@ export default function App() {
             ticks={ticks}
             today={today}
             game={game}
+            todayFacts={todayFacts}
             actions={actions}
             linked={{ workout: workouts[today], arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today] } }}
             weekly={weekly}

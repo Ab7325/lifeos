@@ -10,11 +10,12 @@ import { AnimatePresence, Reorder, motion, useDragControls } from 'framer-motion
 import { flyReward } from '../lib/flyReward'
 import * as kit from '../ui-kit/motion.js'
 import { TIERS, TIER_XP, domainOf, type Habit, type Tier } from '../config/habits'
-import type { Ticks } from '../lib/store'
-import { PartnerStrip } from '../components/PartnerStrip'
-import type { Game } from '../game-core/fold.ts'
+import { dateISO, streakFor, type Ticks } from '../lib/store'
+import { PartnerStrip, type PillarRing } from '../components/PartnerStrip'
+import type { HabitFact } from '../game-core/facts.ts'
+import { nameOf, type Game } from '../game-core/fold.ts'
 import { SLEEP_HABIT, TAGS, tierXp, type Tag } from '../game-core/rules.ts'
-import { ArborHead, ArborSkills, GuitarHead, GuitarItems, GuitarTile, SleepTile, StrongTile, type LinkedCtx } from '../components/LinkedTiles'
+import { ArborHead, ArborSkills, GuitarHead, GuitarItems, GuitarTile, PillarTile, SleepTile, StrongTile, type LinkedCtx } from '../components/LinkedTiles'
 import { MonthReviews, SundayPanel, type WeeklyCtx } from '../components/WeeklyPanels'
 import { linkOf, useStrongLinked } from '../lib/arborLink'
 import { WOODSHED_URL } from '../lib/guitarLink'
@@ -110,19 +111,12 @@ function DomainPicker({ value, onChange }: { value: Tag; onChange: (t: Tag) => v
   )
 }
 
-/**
- * Marks a pillar habit: one of the few that carry the day (100 XP each, and
- * two of them make the day count toward momentum). Drawn in the row's own
- * text colour so it sits on every tile style.
- */
-function PillarMark() {
-  return (
-    <span className="pillar-mark" title="Pillar habit: 100 XP, and two in a day keep your momentum" role="img" aria-label="Pillar habit">
-      <svg viewBox="0 0 16 20" width="16" height="20" shapeRendering="crispEdges" aria-hidden="true">
-        <path fill="currentColor" d="M1 0h14v3H1zM3 3h10v1H3zM4 5h2v10H4zM7 5h2v10H7zM10 5h2v10h-2zM3 16h10v1H3zM1 17h14v3H1z" />
-      </svg>
-    </span>
-  )
+/** The run a habit is on: counted through today when it is ticked, else through yesterday (today can still keep it going). */
+function runOf(ticks: Ticks, id: string, today: string): number {
+  if (ticks[today]?.[id]) return streakFor(ticks, id, today)
+  const y = new Date(today + 'T12:00:00')
+  y.setDate(y.getDate() - 1)
+  return streakFor(ticks, id, dateISO(y))
 }
 
 /** The expandable editor shared by checklist rows and shelf rows. */
@@ -275,6 +269,9 @@ function ChecklistRow({
   // Linked habits are fed by Strong / Arbor and wear that app's look.
   // once the band is in use the Sleep row shows the night, or says it is waiting for it
   const link = habit.id === SLEEP_HABIT && linked.sleep.state !== 'off' ? ('vitals' as const) : linkOf(habit.id)
+  // a pillar no app feeds wears the default pillar look, charged in its kind of work's colour
+  const pillar = !link && habit.tier === 'pillar'
+  const run = useMemo(() => (pillar ? runOf(ticks, habit.id, today) : 0), [pillar, ticks, habit.id, today])
   const strongLinked = useStrongLinked()
   const planned = linked.plan.morning
   const practised = planned.filter((id) => practicedOn(linked.arbor, today, id)).length
@@ -304,8 +301,9 @@ function ChecklistRow({
       <div
         ref={rowEl}
         className={`neo-button relative flex w-full items-center gap-1 py-1 pl-1 pr-3 text-left ${
-          link ? `tile-${link} ${ticked ? 'is-done' : ''}` : ticked ? 'neo-card-green' : 'bg-neo-white'
+          link ? `tile-${link} ${ticked ? 'is-done' : ''}` : pillar ? `tile-pillar ${ticked ? 'is-done' : ''}` : ticked ? 'neo-card-green' : 'bg-neo-white'
         } ${open ? 'mb-0' : ''}`}
+        data-tag={pillar ? domainOf(habit) : undefined}
       >
         {arranging ? (
           <Grip
@@ -319,7 +317,6 @@ function ChecklistRow({
         ) : (
           <span className="w-2 shrink-0" aria-hidden />
         )}
-        {habit.tier === 'pillar' && <PillarMark />}
         {link === 'strong' ? (
           <StrongTile
             name={habit.name}
@@ -354,6 +351,8 @@ function ChecklistRow({
             open={showSession}
             onToggle={() => (session.length > 0 ? setSkillsOpen(!showSession) : actions.onToggle(habit.id))}
           />
+        ) : pillar ? (
+          <PillarTile name={habit.name} emoji={habit.emoji} xp={xp} ticked={ticked} run={run} onToggle={() => actions.onToggle(habit.id)} xpRef={xpEl} />
         ) : (
         <div
           role="button"
@@ -601,6 +600,7 @@ export function HabitsScreen({
   ticks,
   today,
   game,
+  todayFacts,
   actions,
   linked,
   weekly,
@@ -612,6 +612,8 @@ export function HabitsScreen({
   ticks: Ticks
   today: string
   game: Game
+  /** today's habits as the game counts them: what each pillar is worth and how much of it is done */
+  todayFacts: HabitFact[]
   actions: HabitActions
   linked: LinkedCtx
   /** month-end review + Sunday reset — the not-every-day blocks */
@@ -674,6 +676,18 @@ export function HabitsScreen({
   const shown = showAll ? live : live.filter((h) => !isHidden(h.id))
   const doneHidden = live.filter((h) => isHidden(h.id)).length
 
+  // the pillars on today's list, in the list's order, as the game counts them (a block pays for the share done)
+  const pillars: PillarRing[] = useMemo(() => {
+    const facts = new Map(todayFacts.map((f) => [f.id, f]))
+    return live
+      .filter((h) => h.tier === 'pillar')
+      .map((h) => {
+        const f = facts.get(h.id)
+        const done = Boolean(todayRaw?.[h.id]) || Boolean(f?.done)
+        return { id: h.id, name: h.name, emoji: h.emoji, tag: f?.tag ?? domainOf(h), frac: done ? 1 : (f?.frac ?? 0), done, worth: f?.worth ?? tierXp(h.tier) }
+      })
+  }, [live, todayFacts, todayRaw])
+
   const tickCounts = useMemo(() => {
     const out: Record<string, number> = {}
     for (const day of Object.values(ticks))
@@ -695,7 +709,7 @@ export function HabitsScreen({
 
   return (
     <div className="space-y-4">
-      <PartnerStrip game={game} left={live.length - doneCount} />
+      <PartnerStrip game={game} pillars={pillars} />
 
       <MonthReviews
         reviews={weekly.reviews}
@@ -703,19 +717,48 @@ export function HabitsScreen({
         onOpen={weekly.onOpenMonth}
       />
 
-      <div className="flex items-center justify-between">
-        <div className="hud-label border-black text-sm">Today</div>
-        <button
-          type="button"
-          onClick={() => {
-            setArranging((a) => !a)
-            setOpenId(null)
-          }}
-          aria-pressed={arranging}
-          className={`neo-button px-3 py-1 text-[11px] font-bold uppercase ${arranging ? 'neo-card-yellow' : 'bg-white'}`}
-        >
-          {arranging ? '✓ Done arranging' : '⠿ Arrange'}
-        </button>
+      <div className="today-head">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <h2 className="today-title">Today</h2>
+            <span className="num text-sm font-bold">
+              {doneCount}/{live.length}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setArranging((a) => !a)
+              setOpenId(null)
+            }}
+            aria-pressed={arranging}
+            className={`neo-button px-3 py-1 text-[11px] font-bold uppercase ${arranging ? 'neo-card-yellow' : 'bg-white'}`}
+          >
+            {arranging ? '✓ Done arranging' : '⠿ Arrange'}
+          </button>
+        </div>
+        {live.length > 0 && (
+          <>
+            <div
+              className="day-track"
+              role="progressbar"
+              aria-label="Habits ticked today"
+              aria-valuemin={0}
+              aria-valuemax={live.length}
+              aria-valuenow={doneCount}
+              style={{ ['--n' as string]: live.length }}
+            >
+              {live.map((h) => (
+                <i key={h.id} className={todayTicks[h.id] ? (h.tier === 'pillar' ? 'on is-pillar' : 'on') : h.tier === 'pillar' ? 'is-pillar' : ''} data-tag={h.tier === 'pillar' ? domainOf(h) : undefined} />
+              ))}
+            </div>
+            <p className="day-caption">
+              {doneCount === live.length
+                ? 'Perfect day. Everything on the list is done.'
+                : `${live.length - doneCount} to a perfect day${game.wild && !game.wild.caught ? `, which catches the wild ${nameOf(game.wild.form)}` : ''} · ${game.today.pillars}/${game.today.pillarTotal} pillars`}
+            </p>
+          </>
+        )}
       </div>
 
       {arranging && (
@@ -729,8 +772,9 @@ export function HabitsScreen({
           Nothing on today&apos;s checklist. Add one below, or pull one off the shelf.
         </div>
       ) : shown.length === 0 ? (
-        <div className="neo-card bg-white px-4 py-6 text-center text-sm font-bold text-neo-gray-dark">
-          Everything on today&apos;s checklist is done.
+        <div className="all-done neo-card neo-card-yellow px-4 py-6 text-center">
+          <div className="font-display text-2xl font-bold uppercase tracking-wider">All done</div>
+          <div className="mt-1 text-sm font-bold opacity-75">Everything on today&apos;s list is ticked. Tap “show” below to look back over it.</div>
         </div>
       ) : (
         <Reorder.Group axis="y" values={shown} onReorder={commit} className="space-y-2">

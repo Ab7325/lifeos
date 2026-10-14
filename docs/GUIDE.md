@@ -64,7 +64,7 @@ Once the party is six (the partner and five fully trained), a boss comes each Mo
 - **A catch is a chance.** At 40% HP or less you get three throws. A finished card is most of the chance; HP still on it and a party it outmatches both cost.
 - **It pays** at 25, 50 and 75% of its HP, for each finished task, for a kill and for a catch, through the Collect strip. A boss that is not caught leaves on Sunday and nothing is taken back.
 
-The card (`boss_card`) and each day's progress (`boss_day`) are written to the ledger by the Pokedex and read by both apps. Life OS shows one line in the partner strip. `node tools/boss-sim.mjs` in the pokedex repo reports how hard it is for each kind of party. The full design is `BOSS-DESIGN.md` there.
+The card (`boss_card`) and each day's progress (`boss_day`) are written to the ledger by the Pokedex and read by both apps. Life OS shows it as a tile with its HP on the partner card. `node tools/boss-sim.mjs` in the pokedex repo reports how hard it is for each kind of party. The full design is `BOSS-DESIGN.md` there.
 
 ### Motion (13 Oct 2026)
 
@@ -72,7 +72,7 @@ The Pokedex's reveals now follow a motion study: rewards wait to be opened, an e
 
 ### Collecting rewards (12 Oct 2026)
 
-Showing-up pay, weekly quests, season steps, feats and a reviewed month are **held** and reach the wallet when you tap them in the Pokedex's Collect strip (a `claim` event in the ledger, the same on every device), or on their own 3 days after they were earned. Catch, evolve and badge gems, chests and selling a Pokemon stay instant. A second day running at 75% or more adds 20 coins to the pay, and a month review pays 10 gems with its Comet Shard. Life OS's partner strip shows "N to collect" while any are held. The Pokedex keeps three small things on the device only: what sound is on, which toasts it has said, and which news it has told.
+Showing-up pay, weekly quests, season steps, feats and a reviewed month are **held** and reach the wallet when you tap them in the Pokedex's Collect strip (a `claim` event in the ledger, the same on every device), or on their own 3 days after they were earned. Catch, evolve and badge gems, chests and selling a Pokemon stay instant. A second day running at 75% or more adds 20 coins to the pay, and a month review pays 10 gems with its Comet Shard. Life OS's partner card shows a gold "N to collect" pill while any are held. The Pokedex keeps three small things on the device only: what sound is on, which toasts it has said, and which news it has told.
 
 ### Stakes (live from 12 Oct 2026)
 
