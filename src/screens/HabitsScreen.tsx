@@ -11,8 +11,7 @@ import { flyReward } from '../lib/flyReward'
 import * as kit from '../ui-kit/motion.js'
 import { TIERS, TIER_XP, domainOf, type Habit, type Tier } from '../config/habits'
 import { dateISO, streakFor, type Ticks } from '../lib/store'
-import { PartnerStrip, type PillarRing } from '../components/PartnerStrip'
-import type { HabitFact } from '../game-core/facts.ts'
+import { PartnerStrip } from '../components/PartnerStrip'
 import { nameOf, type Game } from '../game-core/fold.ts'
 import { SLEEP_HABIT, TAGS, tierXp, type Tag } from '../game-core/rules.ts'
 import { ArborHead, ArborSkills, GuitarHead, GuitarItems, GuitarTile, PillarTile, SleepTile, StrongTile, type LinkedCtx } from '../components/LinkedTiles'
@@ -600,7 +599,6 @@ export function HabitsScreen({
   ticks,
   today,
   game,
-  todayFacts,
   actions,
   linked,
   weekly,
@@ -612,8 +610,6 @@ export function HabitsScreen({
   ticks: Ticks
   today: string
   game: Game
-  /** today's habits as the game counts them: what each pillar is worth and how much of it is done */
-  todayFacts: HabitFact[]
   actions: HabitActions
   linked: LinkedCtx
   /** month-end review + Sunday reset — the not-every-day blocks */
@@ -676,18 +672,6 @@ export function HabitsScreen({
   const shown = showAll ? live : live.filter((h) => !isHidden(h.id))
   const doneHidden = live.filter((h) => isHidden(h.id)).length
 
-  // the pillars on today's list, in the list's order, as the game counts them (a block pays for the share done)
-  const pillars: PillarRing[] = useMemo(() => {
-    const facts = new Map(todayFacts.map((f) => [f.id, f]))
-    return live
-      .filter((h) => h.tier === 'pillar')
-      .map((h) => {
-        const f = facts.get(h.id)
-        const done = Boolean(todayRaw?.[h.id]) || Boolean(f?.done)
-        return { id: h.id, name: h.name, emoji: h.emoji, tag: f?.tag ?? domainOf(h), frac: done ? 1 : (f?.frac ?? 0), done, worth: f?.worth ?? tierXp(h.tier) }
-      })
-  }, [live, todayFacts, todayRaw])
-
   const tickCounts = useMemo(() => {
     const out: Record<string, number> = {}
     for (const day of Object.values(ticks))
@@ -709,7 +693,7 @@ export function HabitsScreen({
 
   return (
     <div className="space-y-4">
-      <PartnerStrip game={game} pillars={pillars} />
+      <PartnerStrip game={game} />
 
       <MonthReviews
         reviews={weekly.reviews}

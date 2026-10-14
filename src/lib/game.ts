@@ -6,7 +6,7 @@
 // The sprites are not in this repo either: they are loaded from the Pokedex
 // site by URL.
 import { useMemo } from 'react'
-import { buildFacts, type HabitFact } from '../game-core/facts.ts'
+import { buildFacts } from '../game-core/facts.ts'
 import { foldGame, nameOf, spritePath, type Game, type Moment } from '../game-core/fold.ts'
 import type { Habit } from '../config/habits'
 import type { Ticks } from './store'
@@ -23,12 +23,11 @@ import type { GameLink } from './gameLink'
 export const POKEDEX_URL: string = (import.meta.env.VITE_POKEDEX_URL || (import.meta.env.DEV ? 'http://localhost:5190' : '')).replace(/\/$/, '')
 export const spriteUrl = (form: string, shiny = false): string => POKEDEX_URL + spritePath(form, shiny)
 
-/** The game, and today's habits as the game counts them (what each is worth and how much of it is done). */
-export function useGame(habits: Habit[], ticks: Ticks, arbor: ArborState, shed: ShedState, link: GameLink, today: string): { game: Game; todayFacts: HabitFact[] } {
-  return useMemo(() => {
-    const facts = buildFacts({ habits, ticks, arbor, shed, lists: link.lists, body: link.body, uses: link.uses, boss: link.boss, today })
-    return { game: foldGame(facts), todayFacts: facts.find((f) => f.day === today)?.habits ?? [] }
-  }, [habits, ticks, arbor, shed, link, today])
+export function useGame(habits: Habit[], ticks: Ticks, arbor: ArborState, shed: ShedState, link: GameLink, today: string): Game {
+  return useMemo(
+    () => foldGame(buildFacts({ habits, ticks, arbor, shed, lists: link.lists, body: link.body, uses: link.uses, boss: link.boss, today })),
+    [habits, ticks, arbor, shed, link, today],
+  )
 }
 
 /** An item's picture on the Pokedex site. A few files are not named for their item. */

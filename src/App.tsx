@@ -239,7 +239,7 @@ export default function App() {
   }
 
   const link = useGameLink()
-  const { game, todayFacts } = useGame(habits, ticks, arbor, shed, link, today)
+  const game = useGame(habits, ticks, arbor, shed, link, today)
 
   // Record today's habit list, with each habit's tier and domain, so editing
   // or deleting a habit cannot change what a day was. From rules version 4 the
@@ -391,7 +391,6 @@ export default function App() {
             ticks={ticks}
             today={today}
             game={game}
-            todayFacts={todayFacts}
             actions={actions}
             linked={{ workout: workouts[today], arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today] } }}
             weekly={weekly}

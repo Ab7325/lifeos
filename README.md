@@ -9,7 +9,7 @@ LifeOS is a personal web app (built by Rishabh, for Rishabh) that acts like a si
 
 ## What it actually does
 
-Two tabs. **Daily** is the day: the partner card, then a progress bar with one cell per habit, then your checklist (tap to tick, Arrange to drag), and a "shelf" underneath holding every habit you've switched off. **Monthly** is the history: the month in numbers (with the change from the month before), a calendar where each day is as green as it was full and tapping a day lists what was done and missed, the daily completion bars with the month's average, the habits ranked best kept first with their longest run, and the full habit-by-day grid. ← and → step through the months.
+Two tabs. **Daily** is the day: the partner card, then a progress bar with one cell per habit, then your checklist (tap to tick, Arrange to drag), and a "shelf" underneath holding every habit you've switched off. **Monthly** is the history: the month in numbers (with the change from the month before), the daily completion bars on a 0-100 scale (green 80+, blue 50+, orange 25+, red under, a dashed line for the month's average; tap a bar to see that day's done and missed habits), the habit-by-day grid (it opens on today), and, folded shut at the bottom, the habits ranked best kept first. ← and → step through the months.
 
 ## Pillars wear their own look
 
@@ -49,7 +49,7 @@ Two things that are not daily habits live on the Daily screen. Neither pays XP o
 
 ## The game
 
-Every tick feeds one partner that levels up and evolves; a perfect day catches a new one. The card at the top of the checklist shows it in the Pokedex's own night-screen look: the partner and today's XP, coins, gems and what waits to be collected, today's pillars as rings that fill in their colour (tap one to jump to its row), the week's momentum as seven dots, and the wild Pokemon, the gym leader and the boss with their HP. The collection lives on the separate Pokedex site. The three pillar habits (LeetCode, Gym, Woodshed) carry most of the XP; everything else pays a little.
+Every tick feeds one partner that levels up and evolves; a perfect day catches a new one. The card at the top of the checklist shows it in the Pokedex's own night-screen look: the partner and today's XP, coins, gems and what waits to be collected, the week's momentum as seven dots, and the wild Pokemon, the gym leader and the boss with their HP. The collection lives on the separate Pokedex site. The three pillar habits (LeetCode, Gym, Woodshed) carry most of the XP; everything else pays a little.
 
 Nothing about the game is stored: it is recomputed from the habits and ticks by `src/game-core/`, which is copied from the pokedex repo (`npm run core` there). Do not edit it here. Sprites are not in this repo; they are loaded from the Pokedex site (`VITE_POKEDEX_URL`).
 

@@ -11,9 +11,9 @@
 // yours to change, right up until it seals.
 //
 // Read top to bottom it answers: how did the month go (the numbers, and against
-// the month before), what did each day look like (a calendar you can tap into),
-// which habits held and which slipped (a ranking), and the full habit × day grid.
-import { useEffect, useMemo, useState } from 'react'
+// the month before), what did each day look like (tap a bar),
+// and the full habit × day grid. The ranking of habits sits shut at the bottom.
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { domainOf, type Habit } from '../config/habits'
 import { tagOf } from '../game-core/rules.ts'
 import type { Ticks } from '../lib/store'
@@ -30,8 +30,6 @@ import {
 } from '../lib/monthSnapshot'
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
-/** the calendar's week starts on Monday */
-const WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 type Cell = 'done' | 'missed' | 'na' | 'future'
 interface DayStat {
@@ -96,16 +94,9 @@ function longestRun<T>(items: T[], ok: (x: T) => boolean): number {
   return best
 }
 
-/** One green, darker as the day was fuller: the same scale in the calendar, the bars and the ranking. */
-function heat(pct: number | null): string {
-  if (pct === null) return 'heat-none'
-  if (pct >= 1) return 'heat-5'
-  if (pct >= 0.8) return 'heat-4'
-  if (pct >= 0.5) return 'heat-3'
-  if (pct >= 0.25) return 'heat-2'
-  if (pct > 0) return 'heat-1'
-  return 'heat-0'
-}
+/** A bar's colour says how the day went: green 80+, blue 50+, orange 25+, red under that. */
+const barTone = (pct: number): string =>
+  pct >= 0.8 ? 'bg-neo-green' : pct >= 0.5 ? 'bg-neo-blue' : pct >= 0.25 ? 'bg-neo-orange' : 'bg-neo-red'
 
 export function MonthView({
   habits,
@@ -167,6 +158,15 @@ export function MonthView({
   const selDay = picked && picked <= days.length ? picked : defaultDay
   useEffect(() => setPicked(null), [ym])
 
+  // a long month scrolls the grid sideways: open it on today, not on the 1st
+  const gridEl = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = gridEl.current
+    const t = el?.querySelector<HTMLElement>('[data-today]')
+    if (el && t) el.scrollLeft = Math.max(0, t.offsetLeft - 200)
+    else if (el) el.scrollLeft = 0
+  }, [ym, rows.length])
+
   // ← and → step through the months
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -205,8 +205,6 @@ export function MonthView({
           ? { chip: 'Sealed', cls: 'bg-neo-green', line: 'Written down when it ended: editing or deleting habits now cannot change it.' }
           : { chip: 'No record', cls: 'bg-neo-gray', line: 'Nothing was tracked before the app started keeping monthly seals.' }
 
-  // the calendar: blanks before the 1st so it starts on its weekday (Monday first)
-  const lead = (dowOf(1) + 6) % 7
   const sel = dayStats[selDay - 1]
   const selCells = rows.map((h) => ({ h, c: cellOf(snap, today, h.id, selDay) }))
   const selDone = selCells.filter((x) => x.c === 'done')
@@ -260,182 +258,143 @@ export function MonthView({
         ))}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className="space-y-5">
-          {/* Calendar: each day a square, as green as it was full. Tap one to see it */}
-          <section className="neo-card bg-white p-3" aria-label="Calendar">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="hud-label border-black text-xs">Calendar</div>
-              <HeatKey />
-            </div>
-            <div className="cal-grid" role="grid" aria-label={`${label}, day by day`}>
-              {WEEK.map((w, i) => (
-                <div key={i} className="cal-dow" aria-hidden>
-                  {w}
-                </div>
-              ))}
-              {Array.from({ length: lead }, (_, i) => (
-                <div key={`b${i}`} aria-hidden />
-              ))}
-              {dayStats.map((s) => {
-                const future = isFuture(s.d)
-                const isToday = iso(s.d) === today
-                return (
-                  <button
-                    key={s.d}
-                    type="button"
-                    onClick={() => setPicked(s.d)}
-                    aria-pressed={s.d === selDay}
-                    aria-label={`${s.d} ${label}: ${future ? 'upcoming' : s.pct === null ? 'nothing scheduled' : `${s.done} of ${s.expected} habits`}`}
-                    className={`cal-day ${future ? 'is-future' : heat(s.pct)} ${isToday ? 'is-today' : ''} ${s.d === selDay ? 'is-sel' : ''}`}
-                  >
-                    <span className="num cal-n">{s.d}</span>
-                    {!future && s.pct !== null && <span className="num cal-p">{s.pct >= 1 ? '★' : Math.round(s.pct * 100)}</span>}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* the day you tapped */}
-            <div className="mt-3 border-t-2 border-black pt-3" aria-live="polite">
-              <div className="flex items-baseline justify-between gap-2">
-                <div className="font-display text-sm font-bold uppercase tracking-wide">{selLabel}</div>
-                {sel && !isFuture(selDay) && sel.pct !== null && (
-                  <div className="num text-sm font-bold">
-                    {sel.done}/{sel.expected} · {Math.round(sel.pct * 100)}%
-                  </div>
-                )}
-              </div>
-              {isFuture(selDay) ? (
-                <p className="mt-2 text-[12px] font-bold text-neo-gray-dark">Hasn’t happened yet.</p>
-              ) : !sel || sel.pct === null ? (
-                <p className="mt-2 text-[12px] font-bold text-neo-gray-dark">Nothing was on the list that day.</p>
-              ) : (
-                <div className="mt-2 space-y-2">
-                  {selMissed.length > 0 && (
-                    <div>
-                      <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neo-red">Missed · {selMissed.length}</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selMissed.map(({ h }) => (
-                          <span key={h.id} className={`day-chip is-missed ${h.tier === 'pillar' ? 'is-pillar' : ''}`} data-tag={h.tier === 'pillar' ? tagFor(h) : undefined}>
-                            {h.emoji} {h.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {selDone.length > 0 && (
-                    <div>
-                      <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Done · {selDone.length}</div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selDone.map(({ h }) => (
-                          <span key={h.id} className={`day-chip is-done ${h.tier === 'pillar' ? 'is-pillar' : ''}`} data-tag={h.tier === 'pillar' ? tagFor(h) : undefined}>
-                            {h.emoji} {h.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
+      {/* Daily completion: the month's days as bars on a 0-100 scale. Colour says how the day went; tap a bar for its habits */}
+      <section className="neo-card bg-white p-4" aria-label="Daily completion rate">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <div className="hud-label border-black text-xs">Daily completion</div>
+          <div className="flex items-center gap-3 text-[10px] font-bold text-neo-gray-dark" aria-hidden>
+            {[
+              ['bg-neo-green', '80+'],
+              ['bg-neo-blue', '50+'],
+              ['bg-neo-orange', '25+'],
+              ['bg-neo-red', 'under'],
+            ].map(([c, t]) => (
+              <span key={t} className="flex items-center gap-1">
+                <i className={`inline-block h-2.5 w-2.5 border-2 border-black ${c}`} />
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
-
-        <div className="space-y-5">
-          {/* Completion graph, with the month's average drawn across it */}
-          <section className="neo-card neo-card-pink p-4" aria-label="Daily completion rate">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="hud-label border-black text-xs">Daily completion</div>
-              {avgPct !== null && <span className="num text-[11px] font-bold">avg {avgPct}%</span>}
-            </div>
-            <div className="relative flex h-40 items-end gap-[3px] border-b-2 border-black pb-0">
-              {avgPct !== null && <div className="avg-line" style={{ bottom: `${avgPct}%` }} aria-hidden />}
+        <div className="flex gap-2 pt-2">
+          {/* the scale */}
+          <div className="num relative h-48 w-8 shrink-0 text-right text-[10px] font-bold text-black/60" aria-hidden>
+            {[100, 80, 50, 0].map((v) => (
+              <span key={v} className="absolute right-0 -translate-y-1/2 leading-none" style={{ bottom: `${v}%` }}>
+                {v}
+              </span>
+            ))}
+          </div>
+          <div className="relative h-48 min-w-0 flex-1 border-b-[3px] border-l-2 border-black">
+            {[100, 80, 50].map((v) => (
+              <div key={v} className={`absolute inset-x-0 border-t ${v === 80 ? 'border-dashed border-neo-green' : 'border-black/15'}`} style={{ bottom: `${v}%` }} aria-hidden />
+            ))}
+            {avgPct !== null && (
+              <div className="avg-line" style={{ bottom: `${avgPct}%` }} aria-hidden>
+                <span className="num">avg {avgPct}</span>
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-end gap-[2px] px-[2px]">
               {dayStats.map((s) => {
                 const isToday = iso(s.d) === today
                 const future = isFuture(s.d)
+                const on = s.d === selDay
+                const pct = s.pct === null ? null : Math.round(s.pct * 100)
                 return (
                   <button
                     key={s.d}
                     type="button"
                     onClick={() => setPicked(s.d)}
-                    className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end"
+                    aria-pressed={on}
+                    className={`relative flex h-full min-w-0 flex-1 items-end ${on ? 'bg-black/10' : isWeekend(s.d) ? 'bg-black/[0.04]' : ''}`}
                     title={
                       future
                         ? `${pad2(s.d)} ${label} — upcoming`
-                        : s.pct === null
+                        : pct === null
                           ? `${pad2(s.d)} ${label} — no habits scheduled`
-                          : `${pad2(s.d)} ${label} — ${s.done}/${s.expected} habits (${Math.round(s.pct * 100)}%)`
+                          : `${pad2(s.d)} ${label} — ${s.done}/${s.expected} habits (${pct}%)`
                     }
                     aria-label={`Show ${s.d} ${label}`}
                   >
+                    {on && pct !== null && (
+                      <span className="num absolute left-1/2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap bg-black px-1 py-0.5 text-[10px] font-bold leading-none text-white" style={{ bottom: `${Math.max(pct, 3)}%` }}>
+                        {pct}%
+                      </span>
+                    )}
                     {/* Height is plain CSS, not an entrance animation — a bar that
                         never gets a frame (background tab, reduced motion) must
                         still be the right height. */}
                     <div
-                      style={{
-                        // a day with nothing scheduled gets a stub, not a full-height
-                        // ghost bar that reads as 100% at a glance
-                        height: `${s.pct === null ? (future ? 0 : 6) : Math.max(s.pct * 100, 3)}%`,
-                        transitionDelay: `${s.d * 12}ms`,
-                      }}
-                      className={`w-full rounded-t-[3px] border-x-2 border-t-2 border-black transition-[height] duration-500 ease-out group-hover:brightness-110 ${
-                        s.pct === null ? 'border-dashed bg-neo-gray/30' : isToday ? 'bg-neo-yellow' : heat(s.pct)
-                      } ${s.d === selDay ? 'outline-2 outline-offset-1 outline-black' : ''}`}
+                      style={{ height: `${pct === null ? (future ? 0 : 4) : Math.max(pct, 3)}%`, transitionDelay: `${s.d * 12}ms` }}
+                      className={`w-full border-x-2 border-t-2 border-black transition-[height] duration-500 ease-out ${
+                        pct === null ? 'border-dashed bg-neo-gray/40' : isToday ? 'bar-today' : barTone(s.pct as number)
+                      }`}
                     />
                   </button>
                 )
               })}
             </div>
-            <div className="mt-1 flex gap-[3px]">
-              {days.map((d) => (
-                <div
-                  key={d}
-                  className={`num min-w-0 flex-1 text-center text-[9px] font-bold leading-none ${iso(d) === today ? 'text-black underline' : dowOf(d) === 1 ? 'text-black/70' : 'text-transparent sm:text-black/50'}`}
-                >
-                  {d}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Habits, best kept first */}
-          <section className="neo-card bg-white p-3" aria-label="Habits ranked">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <div className="hud-label border-black text-xs">Habits, best kept first</div>
-              <span className="text-[10px] font-bold uppercase text-neo-gray-dark">best run</span>
-            </div>
-            {ranking.length === 0 ? (
-              <p className="py-4 text-center text-xs font-bold text-neo-gray-dark">{when === 'ahead' ? `${label} hasn’t happened yet.` : `No habits ran in ${label}.`}</p>
-            ) : (
-              <ol className="space-y-1.5">
-                {ranking.map(({ h, done, eligible, pct, run }) => {
-                  const p = Math.round((pct ?? 0) * 100)
-                  const pillar = h.tier === 'pillar'
-                  return (
-                    <li key={h.id} className={`rank-row ${pillar ? 'is-pillar' : ''}`} data-tag={pillar ? tagFor(h) : undefined} title={`${h.name}: ${done} of ${eligible} days`}>
-                      <span className="w-6 shrink-0 text-center text-base leading-none">{h.emoji}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className={`block truncate text-[13px] ${pillar ? 'font-extrabold uppercase tracking-wide' : 'font-bold'}`}>{h.name}</span>
-                        <span className="rank-track">
-                          <i className={heat(pct)} style={{ width: `${Math.max(p, 2)}%` }} />
-                        </span>
-                      </span>
-                      <span className="num w-10 shrink-0 text-right text-sm font-bold">{p}%</span>
-                      <span className="num w-12 shrink-0 text-right text-[11px] font-bold text-neo-gray-dark">
-                        {done}/{eligible}
-                      </span>
-                      <span className="num w-8 shrink-0 text-right text-[11px] font-bold" title={`Longest run this month: ${run} days`}>
-                        {run}d
-                      </span>
-                    </li>
-                  )
-                })}
-              </ol>
-            )}
-          </section>
+          </div>
         </div>
+        <div className="mt-1 flex gap-2">
+          <div className="w-8 shrink-0" />
+          <div className="flex min-w-0 flex-1 gap-[2px] px-[2px]">
+            {days.map((d) => (
+              <div
+                key={d}
+                className={`num min-w-0 flex-1 text-center text-[10px] font-bold leading-none ${
+                  iso(d) === today ? 'text-black underline' : d === selDay ? 'text-black' : d === 1 || d % 5 === 0 ? 'text-black/60' : 'text-transparent'
+                }`}
+              >
+                {d}
+              </div>
+            ))}
+          </div>
+        </div>
+    {/* the day you tapped */}
+    <div className="mt-4 border-t-2 border-black pt-3" aria-live="polite">
+      <div className="flex items-baseline justify-between gap-2">
+        <div className="font-display text-sm font-bold uppercase tracking-wide">{selLabel}</div>
+        {sel && !isFuture(selDay) && sel.pct !== null && (
+          <div className="num text-sm font-bold">
+            {sel.done}/{sel.expected} · {Math.round(sel.pct * 100)}%
+          </div>
+        )}
       </div>
+      {isFuture(selDay) ? (
+        <p className="mt-2 text-[12px] font-bold text-neo-gray-dark">Hasn’t happened yet.</p>
+      ) : !sel || sel.pct === null ? (
+        <p className="mt-2 text-[12px] font-bold text-neo-gray-dark">Nothing was on the list that day.</p>
+      ) : (
+        <div className="mt-2 space-y-2">
+          {selMissed.length > 0 && (
+            <div>
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neo-red">Missed · {selMissed.length}</div>
+              <div className="flex flex-wrap gap-1.5">
+                {selMissed.map(({ h }) => (
+                  <span key={h.id} className={`day-chip is-missed ${h.tier === 'pillar' ? 'is-pillar' : ''}`} data-tag={h.tier === 'pillar' ? tagFor(h) : undefined}>
+                    {h.emoji} {h.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {selDone.length > 0 && (
+            <div>
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Done · {selDone.length}</div>
+              <div className="flex flex-wrap gap-1.5">
+                {selDone.map(({ h }) => (
+                  <span key={h.id} className={`day-chip is-done ${h.tier === 'pillar' ? 'is-pillar' : ''}`} data-tag={h.tier === 'pillar' ? tagFor(h) : undefined}>
+                    {h.emoji} {h.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+      </section>
 
       {/* Habit × day matrix */}
       <section className="neo-card overflow-hidden bg-white p-3" aria-label="Habit completion matrix">
@@ -453,7 +412,7 @@ export function MonthView({
           </span>
         </div>
 
-        <div className="overflow-x-auto pb-2">
+        <div ref={gridEl} className="overflow-x-auto pb-2">
           <div className="min-w-max rounded border-2 border-black bg-neo-bg">
             {/* Header row: day numbers */}
             <div className="sticky top-0 z-20 flex border-b-2 border-black bg-white">
@@ -465,6 +424,7 @@ export function MonthView({
                     key={d}
                     type="button"
                     onClick={() => setPicked(d)}
+                    data-today={isToday ? '' : undefined}
                     className={`num w-7 shrink-0 border-r border-black/20 py-1 text-center text-xs font-bold lg:w-8 ${
                       isToday ? 'border-x-2 border-black bg-neo-yellow font-extrabold text-black' : d === selDay ? 'bg-black text-white' : isWeekend(d) ? 'bg-black/5 text-black/70' : 'text-black/70'
                     }`}
@@ -553,19 +513,43 @@ export function MonthView({
           </div>
         </div>
       </section>
-    </div>
-  )
-}
 
-/** The calendar's scale, small: from an empty day to a perfect one. */
-function HeatKey() {
-  return (
-    <span className="flex items-center gap-1 text-[9px] font-bold uppercase text-neo-gray-dark" aria-hidden>
-      0
-      {['heat-0', 'heat-1', 'heat-2', 'heat-3', 'heat-4', 'heat-5'].map((c) => (
-        <i key={c} className={`inline-block h-3 w-3 border-2 border-black ${c}`} />
-      ))}
-      100
-    </span>
+      {/* Habits, best kept first */}
+      <details className="neo-card bg-white p-3" aria-label="Habits ranked">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
+          <span className="hud-label border-black text-xs">Habits, best kept first</span>
+          <span className="text-[10px] font-bold uppercase text-neo-gray-dark">{ranking.length} habits · show ▼</span>
+        </summary>
+        <div className="mt-3 text-right text-[10px] font-bold uppercase text-neo-gray-dark">done · best run</div>
+        {ranking.length === 0 ? (
+          <p className="py-4 text-center text-xs font-bold text-neo-gray-dark">{when === 'ahead' ? `${label} hasn’t happened yet.` : `No habits ran in ${label}.`}</p>
+        ) : (
+          <ol className="mt-1 space-y-1">
+            {ranking.map(({ h, done, eligible, pct, run }) => {
+              const p = Math.round((pct ?? 0) * 100)
+              const pillar = h.tier === 'pillar'
+              return (
+                <li key={h.id} className={`rank-row ${pillar ? 'is-pillar' : ''}`} data-tag={pillar ? tagFor(h) : undefined} title={`${h.name}: ${done} of ${eligible} days`}>
+                  <span className="w-6 shrink-0 text-center text-base leading-none">{h.emoji}</span>
+                  <span className="min-w-0 flex-1">
+                    <span className={`block truncate text-[13px] ${pillar ? 'font-extrabold uppercase tracking-wide' : 'font-bold'}`}>{h.name}</span>
+                    <span className="rank-track">
+                      <i className={`${barTone(pct ?? 0)}`} style={{ width: `${Math.max(p, 2)}%` }} />
+                    </span>
+                  </span>
+                  <span className="num w-10 shrink-0 text-right text-sm font-bold">{p}%</span>
+                  <span className="num w-12 shrink-0 text-right text-[11px] font-bold text-neo-gray-dark">
+                    {done}/{eligible}
+                  </span>
+                  <span className="num w-8 shrink-0 text-right text-[11px] font-bold" title={`Longest run this month: ${run} days`}>
+                    {run}d
+                  </span>
+                </li>
+              )
+            })}
+          </ol>
+        )}
+      </details>
+    </div>
   )
 }

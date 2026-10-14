@@ -1,5 +1,5 @@
 // The game, in one card: who the partner is, how far today moved it, the
-// pillars, and what today is wearing down. Everything else lives on the Pokedex site.
+// week's pace, and what today is wearing down. Everything else lives on the Pokedex site.
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { leaderOf, nameOf, type Game, type Moment } from '../game-core/fold.ts'
@@ -30,21 +30,6 @@ function Sprite({ form, shiny, size, dim }: { form: string; shiny?: boolean; siz
   )
 }
 
-/** One of today's pillars, as the Pokedex draws it: a ring that fills in its kind of work's colour. */
-export interface PillarRing {
-  id: string
-  name: string
-  emoji: string
-  tag: string
-  /** 0..1 */
-  frac: number
-  done: boolean
-  worth: number
-}
-
-/** The mark a kind of work pays, drawn in the middle of its ring (the journal for a chore that is a pillar). */
-const MARK_ICON: Record<string, string> = { code: 'machine-part', fitness: 'iron', guitar: 'poke-flute', arbor: 'grn-apricorn', sleep: 'lunar-wing', routine: 'journal' }
-
 function ItemPic({ id, size, fallback }: { id: string; size: number; fallback?: string }) {
   const [broken, setBroken] = useState(false)
   const src = itemUrl(id)
@@ -52,23 +37,11 @@ function ItemPic({ id, size, fallback }: { id: string; size: number; fallback?: 
   return <img src={src} alt="" width={size} height={size} className="dex-pix" onError={() => setBroken(true)} draggable={false} />
 }
 
-/** Bring a habit's row into view and make it blink, so a ring can be followed to the thing to do. */
-function showRow(id: string) {
-  const row = document.querySelector<HTMLElement>(`[data-habit-row="${CSS.escape(id)}"]`)
-  if (!row) return
-  row.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  row.classList.remove('row-call')
-  void row.offsetWidth
-  row.classList.add('row-call')
-  window.setTimeout(() => row.classList.remove('row-call'), 1400)
-}
-
 /**
  * The game, in one card, in the Pokedex's own look: a night screen set into the
- * page. The partner and how today moved it, the pillars as rings that fill, the
- * week's pace, and what today is wearing down (the wild Pokemon, the leader, the boss).
+ * page. The partner and how today moved it, the week's pace, and what today is wearing down (the wild Pokemon, the leader, the boss).
  */
-export function PartnerStrip({ game, pillars }: { game: Game; pillars: PillarRing[] }) {
+export function PartnerStrip({ game }: { game: Game }) {
   const { partner, today, momentum, wild, league } = game
   const pct = Math.max(0, Math.min(1, game.into / game.need))
   // the bar has two parts: what was banked before today, and what today added on top
@@ -136,33 +109,6 @@ export function PartnerStrip({ game, pillars }: { game: Game; pillars: PillarRin
           <span data-reward-target="collect" className="dex-collect is-empty">Nothing to collect</span>
         )}
       </div>
-
-      {pillars.length > 0 && (
-        <ul className="dex-pillars" aria-label="Today's pillars">
-          {pillars.map((p) => {
-            const st = p.done ? 'done' : p.frac > 0 ? 'part' : 'todo'
-            return (
-              <li key={p.id}>
-                <button
-                  type="button"
-                  className={`dex-pillar ${st}`}
-                  data-tag={p.tag}
-                  style={{ ['--p' as string]: p.done ? 1 : p.frac }}
-                  onClick={() => showRow(p.id)}
-                  title={`${p.name}: ${Math.round(p.worth * (p.done ? 1 : p.frac))} of ${p.worth} XP. Tap to find it on the list.`}
-                >
-                  <span className="dex-ring">
-                    <ItemPic id={MARK_ICON[p.tag] ?? 'journal'} size={26} fallback={p.emoji} />
-                    {st === 'done' && <i className="dex-tick" aria-hidden />}
-                  </span>
-                  <b>{p.name}</b>
-                  <small>{st === 'done' ? 'Done' : st === 'part' ? `${Math.round(p.frac * 100)}%` : `${p.worth} XP`}</small>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
 
       <div className="dex-pace">
         <div className="dex-pace-cell" title="Days with two pillars in the last seven: 3 make XP ×1.2, 5 ×1.35, 7 ×1.5. It slides back a day at a time, never resets.">
