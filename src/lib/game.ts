@@ -31,7 +31,7 @@ export function useGame(habits: Habit[], ticks: Ticks, arbor: ArborState, shed: 
 }
 
 /** An item's picture on the Pokedex site. A few files are not named for their item. */
-const ITEM_FILE: Record<string, string> = { coin: 'nugget', gem: 'ruby' }
+const ITEM_FILE: Record<string, string> = { coin: 'nugget', gem: 'psychic-gem' }
 export const itemUrl = (id: string): string => (POKEDEX_URL ? `${POKEDEX_URL}/sprites/items/${ITEM_FILE[id] ?? id}.png` : '')
 
 const itemName = (item: string): string => shopName(item)
