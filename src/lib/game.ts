@@ -131,5 +131,20 @@ export function momentText(m: Moment): { title: string; line: string; form?: str
     case 'use':
       return m.what === 'branch' ? { title: 'Branch chosen', line: `${nameOf(m.form)} will evolve into ${nameOf(m.to ?? '')}.`, form: m.form }
         : { title: 'New partner', line: `${nameOf(m.form)} came forward.`, form: m.form }
+    // version 13 (pokedex/RULES-V13.md)
+    case 'pickup':
+      return { title: 'Pickup!', line: `${nameOf(m.form)} found ${itemName(m.item)} on the day's walk.`, form: m.form }
+    case 'endure':
+      return { title: 'Endured', line: `The empty day ${m.empty} cost nothing (${m.how === 'endure' ? 'your bond held' : m.how === 'sash' ? 'the Focus Sash' : 'the Guard Spec'}).` }
+    case 'symbol':
+      return { title: `${m.tier === 'gold' ? 'Gold' : 'Silver'} Symbol`, line: `A Frontier Brain is beaten at the Battle ${m.facility[0].toUpperCase()}${m.facility.slice(1)}.` }
+    case 'summon':
+      return { title: 'A legend stirs', line: `The ${itemName(m.key)} called ${nameOf(m.form)}: it comes next.`, form: m.form }
+    case 'fossil':
+      return { title: 'Back to life', line: `The Lab revived ${nameOf(m.form)}.`, form: m.form }
+    case 'itemevo':
+      return { title: 'Evolved', line: `${nameOf(m.from)} evolved into ${nameOf(m.form)} with the ${itemName(m.item)}.`, form: m.form }
+    case 'lap':
+      return { title: `Rematch rank ★${m.lap + 1}`, line: 'Every league is beaten: they are all back, stronger.' }
   }
 }
