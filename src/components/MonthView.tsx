@@ -209,11 +209,6 @@ export function MonthView({
           ? { chip: 'Sealed', cls: 'bg-neo-green', line: 'Written down when it ended: editing or deleting habits now cannot change it.' }
           : { chip: 'No record', cls: 'bg-neo-gray', line: 'Nothing was tracked before the app started keeping monthly seals.' }
 
-  const sel = dayStats[selDay - 1]
-  const selCells = rows.map((h) => ({ h, c: cellOf(snap, today, h.id, selDay) }))
-  const selDone = selCells.filter((x) => x.c === 'done')
-  const selMissed = selCells.filter((x) => x.c === 'missed')
-  const selLabel = new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)) - 1, selDay).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
     <div className="space-y-5">
@@ -355,49 +350,6 @@ export function MonthView({
             ))}
           </div>
         </div>
-    {/* the day you tapped */}
-    <div className="mt-4 border-t-2 border-black pt-3" aria-live="polite">
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="font-display text-sm font-bold uppercase tracking-wide">{selLabel}</div>
-        {sel && !isFuture(selDay) && sel.pct !== null && (
-          <div className="num text-sm font-bold">
-            {sel.done}/{sel.expected} · {Math.round(sel.pct * 100)}%
-          </div>
-        )}
-      </div>
-      {isFuture(selDay) ? (
-        <p className="mt-2 text-[12px] font-bold text-neo-gray-dark">Hasn’t happened yet.</p>
-      ) : !sel || sel.pct === null ? (
-        <p className="mt-2 text-[12px] font-bold text-neo-gray-dark">Nothing was on the list that day.</p>
-      ) : (
-        <div className="mt-2 space-y-2">
-          {selMissed.length > 0 && (
-            <div>
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neo-red">Missed · {selMissed.length}</div>
-              <div className="flex flex-wrap gap-1.5">
-                {selMissed.map(({ h }) => (
-                  <span key={h.id} className={`day-chip is-missed ${h.tier === 'pillar' ? 'is-pillar' : ''}`} data-tag={h.tier === 'pillar' ? tagFor(h) : undefined}>
-                    {h.emoji} {h.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-          {selDone.length > 0 && (
-            <div>
-              <div className="mb-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">Done · {selDone.length}</div>
-              <div className="flex flex-wrap gap-1.5">
-                {selDone.map(({ h }) => (
-                  <span key={h.id} className={`day-chip is-done ${h.tier === 'pillar' ? 'is-pillar' : ''}`} data-tag={h.tier === 'pillar' ? tagFor(h) : undefined}>
-                    {h.emoji} {h.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
       </section>
 
       {/* Habit × day matrix */}

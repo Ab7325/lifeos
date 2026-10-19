@@ -17,6 +17,7 @@ import { useSyncExternalStore } from 'react'
 import { isActiveOn, isLive, type Habit, type Tier } from '../config/habits'
 import type { Ticks } from './store'
 import { SLEEP_DONE, SLEEP_HABIT, V13_START } from '../game-core/rules.ts'
+import { LEGACY_MONTHS, LEGACY_YMS } from './legacyMonths'
 
 /**
  * Sleep is the band's (version 13): its row is the night's reading, not a tick. A night of SLEEP_DONE or more is done, a lower
@@ -197,7 +198,8 @@ function seal(draft: MonthSnapshot, ticks: Ticks, at: string): MonthSnapshot {
 /** Months worth considering: from the first month with any tick through `ym`. */
 function monthRange(ticks: Ticks, ym: string): string[] {
   const withTicks = Object.keys(ticks).filter((d) => Object.keys(ticks[d] ?? {}).length > 0)
-  const known = [...withTicks.map(ymOf), ...Object.keys(store)].sort()
+  // the seeded pre-Life-OS months don't count: they would drag the range back and seal every empty month since
+  const known = [...withTicks.map(ymOf), ...Object.keys(store).filter((k) => !LEGACY_YMS.has(k))].sort()
   const first = known[0] ?? ym
   const out: string[] = []
   for (let m = first; m <= ym; m = shiftYm(m, 1)) out.push(m)
@@ -236,6 +238,20 @@ export function ensureMonths(habits: Habit[], ticks: Ticks, today: string): Mont
     notify()
   }
   return sealed
+}
+
+/**
+ * Fill the months from before Life OS (the old sheet tracker, Jan–May 2026) into any that have no sealed record.
+ * A month Life OS already sealed with habits in it is never touched. Returns the months added so the caller can broadcast them.
+ */
+export function seedLegacyMonths(): MonthSnapshot[] {
+  const added = LEGACY_MONTHS.filter((m) => !(store[m.ym]?.frozenAt && store[m.ym].habits.length > 0))
+  for (const m of added) store[m.ym] = m
+  if (added.length) {
+    persist()
+    notify()
+  }
+  return added
 }
 
 /**

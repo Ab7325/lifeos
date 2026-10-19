@@ -27,7 +27,7 @@ import {
   useHabits,
   type HabitConfig,
 } from './lib/habitConfig'
-import { ensureMonths, setSleepScores } from './lib/monthSnapshot'
+import { ensureMonths, seedLegacyMonths, setSleepScores } from './lib/monthSnapshot'
 import { VITALS_URL, useCloudSync } from './lib/cloudSync'
 import { TabBar, type Tab } from './components/TabBar'
 import { HabitsScreen, type HabitActions } from './screens/HabitsScreen'
@@ -88,7 +88,7 @@ export default function App() {
   useEffect(() => {
     if (cloud.status === 'connecting') return
     setSleepScores(Object.fromEntries(Object.entries(sleepLink.body).flatMap(([d, b]) => (typeof b.sleepScore === 'number' ? [[d, b.sleepScore]] : []))))
-    for (const snap of ensureMonths(habits, ticks, today))
+    for (const snap of [...seedLegacyMonths(), ...ensureMonths(habits, ticks, today)])
       cloud.emit('month', { ym: snap.ym, snapshot: JSON.stringify(snap) }, `${snap.ym}-01`)
   }, [habits, ticks, today, cloud, sleepLink])
 
