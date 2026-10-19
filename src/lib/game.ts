@@ -146,5 +146,9 @@ export function momentText(m: Moment): { title: string; line: string; form?: str
       return { title: 'Evolved', line: `${nameOf(m.from)} evolved into ${nameOf(m.form)} with the ${itemName(m.item)}.`, form: m.form }
     case 'lap':
       return { title: `Rematch rank ★${m.lap + 1}`, line: 'Every league is beaten: they are all back, stronger.' }
+    case 'research':
+      return { title: `Research rank ${m.rank}`, line: 'The Professor learnt more from his desk: wild Pokemon come weaker, and a gift waits in the Pokedex.' }
+    case 'master':
+      return { title: 'Level 100', line: `${nameOf(m.form)} reached level 100 and stepped aside for the next partner.`, form: m.form }
   }
 }

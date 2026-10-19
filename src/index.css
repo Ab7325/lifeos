@@ -624,3 +624,11 @@ body {
 @media (min-width: 1024px) { .sleep-cell { width: 26px; height: 24px; font-size: 10px; } }
 .wake-start { flex: none; padding: 8px 12px; font-weight: 900; font-size: 14px; color: #111; background: #ffd800; border: 3px solid #111; box-shadow: 3px 3px 0 #111; }
 .wake-start:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #111; }
+
+/* version 14: Sleep can be reported by hand while the band's reading is missing */
+.sleep-self { padding: 6px 10px; font-weight: 900; font-size: 13px; color: #111; background: #e9e6ff; border: 3px solid #111; box-shadow: 3px 3px 0 #111; min-height: 40px; }
+.sleep-self.on { background: #ffd800; }
+.sleep-self:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #111; }
+.sleep-ring.waiting.nudge { animation: sleep-nudge 1.6s ease-in-out infinite; }
+@keyframes sleep-nudge { 50% { transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .sleep-ring.waiting.nudge { animation: none; } }

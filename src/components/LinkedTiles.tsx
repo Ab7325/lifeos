@@ -20,6 +20,7 @@ import { LANE_NAME, type Feel, type ShedState } from '../woodshed-core/model.ts'
 import type { DayWorkout } from '../lib/ledger'
 import type { SleepNight } from '../game-core/events.ts'
 import type { SleepState } from '../lib/gameLink'
+import type { CheckAnswer } from '../lib/healthCheck'
 
 export interface LinkedCtx {
   workout: DayWorkout | undefined
@@ -34,7 +35,7 @@ export interface LinkedCtx {
     onLog: (itemId: string, feel: Feel | null) => void
   }
   /** last night: measured by the band, waiting for its reading, or no band in use */
-  sleep: { state: SleepState; night: SleepNight | undefined }
+  sleep: { state: SleepState; night: SleepNight | undefined; check?: CheckAnswer | null }
 }
 
 // ── pixel pictograms (same engine Arbor draws its tree with) ────────────────
@@ -307,11 +308,12 @@ const scoreWord = (n: number) => (n >= 90 ? 'Excellent' : n >= 80 ? 'Good' : n >
 const STAGES: [keyof SleepNight, string][] = [['deepMin', '#6b5be0'], ['remMin', '#63c6ff'], ['lightMin', '#a9b3d6'], ['awakeMin', '#ff7aa8']]
 
 /**
- * Sleep, the pillar the band fills (version 13): never ticked by hand. With last night's reading it is a small sleep card in the
- * Vitals way (the score on a ring, how long, from when to when, the stages, and what it paid); without one it waits, and a night
- * with no reading is simply not part of the day.
+ * Sleep, the pillar the band fills. With last night's reading it is a small sleep card in the Vitals way (the score on a ring, how
+ * long, from when to when, the stages, and what it paid). Without one it waits and says what it is waiting on (the phone has not
+ * synced, or the night is being scored); from version 14 the night can be reported by hand, paid as a core habit with no Bells,
+ * until the reading comes and replaces it. Left alone, a night with no reading is simply not part of the day.
  */
-export function SleepTile({ name, state, night }: { name: string; state: SleepState; night: SleepNight | undefined; ticked?: boolean; selfXp?: number; onToggle?: () => void }) {
+export function SleepTile({ name, state, night, ticked, selfXp, onToggle, check }: { name: string; state: SleepState; night: SleepNight | undefined; ticked?: boolean; selfXp?: number; onToggle?: () => void; check?: CheckAnswer | null }) {
   if (state === 'measured' && night) {
     const score = night.score ?? 0
     const bells = score >= 90 ? 2 : score >= 80 ? 1 : 0
@@ -344,14 +346,20 @@ export function SleepTile({ name, state, night }: { name: string; state: SleepSt
       </div>
     )
   }
+  const line = state !== 'waiting' ? 'Filled by your band\'s reading of the night'
+    : ticked ? 'Reported by hand · the band\'s reading replaces it'
+      : check && check.state !== 'measured' ? check.message
+        : 'Waiting for last night\'s reading · it fills when the band syncs'
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Filled by your band's reading of the night. A night with no reading is never a miss.">
-      <span className="sleep-ring waiting" aria-hidden><Moon /></span>
+    <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Filled by your band's reading of the night. A night with no reading is never a miss; you can report it by hand for a core habit's XP.">
+      <span className={`sleep-ring waiting ${check?.state === 'not-synced' ? 'nudge' : ''}`} aria-hidden><Moon /></span>
       <span className="min-w-0 flex-1">
         <span className="vit-title block truncate">{name}</span>
-        <span className="block truncate text-[11px] font-bold opacity-80">{state === 'waiting' ? 'Waiting for last night\'s reading · it fills when the band syncs' : 'Filled by your band\'s reading of the night'}</span>
+        <span className="block text-[11px] font-bold leading-tight opacity-80">{line}</span>
       </span>
-      <span className="num shrink-0 text-sm font-bold opacity-70">0 to 100</span>
+      {state === 'waiting' && onToggle
+        ? <button type="button" className={`sleep-self num shrink-0 ${ticked ? 'on' : ''}`} aria-pressed={Boolean(ticked)} onClick={onToggle} title={ticked ? 'Take the hand report back' : `No reading yet: report the night yourself (+${selfXp ?? 30} XP, no Bells). The band's reading replaces it when it comes.`}>{ticked ? `✓ +${selfXp ?? 30}` : 'Slept?'}</button>
+        : <span className="num shrink-0 text-sm font-bold opacity-70">0 to 100</span>}
     </div>
   )
 }

@@ -338,7 +338,7 @@ function ChecklistRow({
             onToggle={() => setSkillsOpen(!showSkills)}
           />
         ) : link === 'vitals' ? (
-          <SleepTile name={habit.name} state={linked.sleep.state} night={linked.sleep.night} ticked={ticked} selfXp={TIER_XP.core} onToggle={() => actions.onToggle(habit.id)} />
+          <SleepTile name={habit.name} state={linked.sleep.state} night={linked.sleep.night} ticked={ticked} selfXp={TIER_XP.core} onToggle={() => actions.onToggle(habit.id)} check={linked.sleep.check} />
         ) : link === 'woodshed' && WOODSHED_URL ? (
           <GuitarTile name={habit.name} xp={xp} ticked={ticked} done={played} total={session.length} />
         ) : link === 'woodshed' ? (

@@ -44,9 +44,10 @@ import { statsOf, type Feel } from './woodshed-core/model.ts'
 import { SKILL_BY_ID } from './arbor-core/skills.ts'
 import { useGame } from './lib/game'
 import { applyGameEvents, sleepMeasured, sleepState, useGameLink } from './lib/gameLink'
+import { useHealthCheck } from './lib/healthCheck'
 import { listAdds } from './game-core/events.ts'
 import { SLEEP_DONE, SLEEP_HABIT, V13_START } from './game-core/rules.ts'
-import { DAY_START_EVENT } from './game-core/day.ts'
+import { DAY_START_EVENT, clockOf } from './game-core/day.ts'
 import { Moments } from './components/PartnerStrip'
 
 export default function App() {
@@ -56,7 +57,7 @@ export default function App() {
   const [health, setHealth] = useState<HealthMap>(() => loadHealth())
   const [workouts, setWorkouts] = useState<WorkoutMap>(() => loadWorkouts())
   // the waking day: after midnight it stays yesterday until the band reads the night (lib/day.ts)
-  const { today, calendar } = useToday()
+  const { today, calendar, startsAt } = useToday()
   // `habits` is the whole library, in one canonical order; the checklist is its
   // live slice and the shelf is the rest — same order, two sections.
   const habits = useHabits()
@@ -258,6 +259,8 @@ export default function App() {
   }
 
   const link = useGameLink()
+  // while Sleep waits for today's reading, ask whether Google has the night (and fetch it if it does)
+  const sleepCheck = useHealthCheck(sleepState(link, today) === 'waiting')
   const game = useGame(habits, ticks, arbor, shed, link, today)
 
   // Record today's habit list, with each habit's tier and domain, so editing
@@ -295,7 +298,8 @@ export default function App() {
 
   const toggle = (habitId: string) => {
     if (isLocked(habitId)) return // fed by Strong / Arbor — not ticked by hand
-    if (habitId === SLEEP_HABIT) return // filled by the band's reading of the night, never by hand
+    // filled by the band's reading of the night; with no reading yet it can be reported by hand (version 14: a core habit, no Bells), and the reading replaces it
+    if (habitId === SLEEP_HABIT && sleepMeasured(link, SLEEP_HABIT, today)) return
     if (habitId === GUITAR_HABIT && session.length > 0) return // ticks itself when the session is logged
     const wasTicked = Boolean(ticks[today]?.[habitId])
     const at = new Date().toISOString()
@@ -414,7 +418,7 @@ export default function App() {
             <span className="wake-moon" aria-hidden>🌙</span>
             <span className="min-w-0 flex-1">
               <b className="block">Still {new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' })}</b>
-              <small className="block">Your day ends when you wake: it rolls over once the band reads the night{new Date().getHours() < 14 ? ', or at 2 pm' : ''}. Ticks now still count for {new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' })}.</small>
+              <small className="block">Your day ends when you wake: it rolls over once the band reads the night, or at {clockOf(startsAt)}, two hours before you usually wake. Ticks now still count for {new Date(today + 'T12:00:00').toLocaleDateString('en-IN', { weekday: 'long' })}.</small>
             </span>
             <button type="button" className="wake-start" onClick={startDay}>Start my day</button>
           </div>
@@ -428,7 +432,7 @@ export default function App() {
             today={today}
             game={game}
             actions={actions}
-            linked={{ workout: workouts[today], arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today] } }}
+            linked={{ workout: workouts[today], arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today], check: sleepCheck } }}
             weekly={weekly}
           />
         )}

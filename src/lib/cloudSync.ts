@@ -90,11 +90,13 @@ const COLS = 'device, at, day, type, payload, inserted_at'
 async function fetchEvents(
   sb: NonNullable<typeof supabase>,
   since?: string,
+  skip: string[] = [],
 ): Promise<LifeEvent[] | null> {
   const out: LifeEvent[] = []
   for (let from = 0; ; from += PAGE) {
     let q = sb.from('events').select(COLS)
     if (since) q = q.gt('inserted_at', since)
+    if (skip.length) q = q.not('type', 'in', `(${skip.join(',')})`)
     const { data, error } = await q
       .order(since ? 'inserted_at' : 'at', { ascending: true })
       .order('id', { ascending: true })
@@ -430,7 +432,18 @@ export function useCloudSync(snapshot: CloudSnapshot, setters: CloudSetters): Cl
     let cancelled = false
 
     const boot = async () => {
-      const data = await fetchEvents(sb)
+      // The rows that decide which day it is come first, in one small read: the band's nights and any "Start my day" since
+      // yesterday. The day turns over now, not after the whole ledger has come down.
+      const since = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10)
+      const head = await sb.from('events').select(COLS).in('type', ['vitals', 'day_start']).gte('day', since)
+      if (!cancelled && head.data) applyGameEvents(head.data as LifeEvent[])
+      // Then everything, except the habit library: each `config` row is a full copy and only the newest stands (LWW), so it is
+      // read on its own instead of every copy ever written.
+      const [rest, cfg] = await Promise.all([
+        fetchEvents(sb, undefined, ['config']),
+        sb.from('events').select(COLS).eq('type', 'config').order('at', { ascending: false }).limit(1),
+      ])
+      const data = rest && !cfg.error ? [...rest, ...((cfg.data ?? []) as LifeEvent[])] : null
       if (cancelled) return
       if (!data) {
         setStatus('error')
