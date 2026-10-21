@@ -25,7 +25,6 @@ import { SEED_AT, applySundayList, getSundayList, type SundayTask } from './sund
 /** The sleep habit Vitals can tick, and how early "on time" is (the habit says 10; half an hour of grace). */
 const SLEEP_HABIT = 'sleep-before-10'
 const SLEEP_BED_BY = '22:30'
-export const VITALS_URL: string = import.meta.env.VITE_VITALS_URL ?? 'https://vitals-theta-pied.vercel.app'
 
 export type CloudStatus = 'off' | 'connecting' | 'live' | 'error'
 

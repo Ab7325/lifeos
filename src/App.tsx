@@ -28,7 +28,7 @@ import {
   type HabitConfig,
 } from './lib/habitConfig'
 import { ensureMonths, seedLegacyMonths, setSleepScores } from './lib/monthSnapshot'
-import { VITALS_URL, useCloudSync } from './lib/cloudSync'
+import { useCloudSync } from './lib/cloudSync'
 import { TabBar, type Tab } from './components/TabBar'
 import { HabitsScreen, type HabitActions } from './screens/HabitsScreen'
 import { MonthView } from './components/MonthView'
@@ -450,8 +450,6 @@ export default function App() {
         {cloud.status === 'error' && '☁️ sync error'}
         {cloud.status === 'off' && 'cloud sync off (local storage active)'}
         {cloud.pending > 0 && ` · ${cloud.pending} queued`}
-        {' · '}
-        <a href={VITALS_URL} target="_blank" rel="noreferrer" className="underline">Vitals</a>
       </footer>
 
       <TabBar
