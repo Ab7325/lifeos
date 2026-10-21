@@ -632,7 +632,9 @@ export function HabitsScreen({
 
   const todayRaw = ticks[today]
   const todayTicks = todayRaw ?? {}
-  const doneCount = live.filter((h) => todayTicks[h.id]).length
+  // a measured night is logged whatever its score, so it counts as done even when too low to tick
+  const isDone = (id: string): boolean => Boolean(todayTicks[id]) || (id === SLEEP_HABIT && linked.sleep.state === 'measured')
+  const doneCount = live.filter((h) => isDone(h.id)).length
   // the clock the hiding is judged against; moved on by a timer for the next tick to expire
   const [now, setNow] = useState(() => Date.now())
   const [showDone, setShowDone] = useState(false)
@@ -666,7 +668,7 @@ export function HabitsScreen({
   // a tick older than DONE_HIDE_MS (or one with no usable time) is done and out of the way
   const isHidden = (id: string): boolean => {
     // a measured night is logged whatever its score: a low one is not ticked, but the row is still done
-    if (id === SLEEP_HABIT && linked.sleep.state === 'measured' && !todayTicks[id]) return true
+    if (id === SLEEP_HABIT && !todayTicks[id] && isDone(id)) return true
     const at = todayTicks[id]
     if (!at) return false
     const t = Date.parse(at)
@@ -736,7 +738,7 @@ export function HabitsScreen({
               style={{ ['--n' as string]: live.length }}
             >
               {live.map((h) => (
-                <i key={h.id} className={todayTicks[h.id] ? (h.tier === 'pillar' ? 'on is-pillar' : 'on') : h.tier === 'pillar' ? 'is-pillar' : ''} data-tag={h.tier === 'pillar' ? domainOf(h) : undefined} />
+                <i key={h.id} className={isDone(h.id) ? (h.tier === 'pillar' ? 'on is-pillar' : 'on') : h.tier === 'pillar' ? 'is-pillar' : ''} data-tag={h.tier === 'pillar' ? domainOf(h) : undefined} />
               ))}
             </div>
             <p className="day-caption">
