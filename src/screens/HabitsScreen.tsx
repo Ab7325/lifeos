@@ -665,6 +665,8 @@ export function HabitsScreen({
   }, [todayRaw, now, live, showAll])
   // a tick older than DONE_HIDE_MS (or one with no usable time) is done and out of the way
   const isHidden = (id: string): boolean => {
+    // a measured night is logged whatever its score: a low one is not ticked, but the row is still done
+    if (id === SLEEP_HABIT && linked.sleep.state === 'measured' && !todayTicks[id]) return true
     const at = todayTicks[id]
     if (!at) return false
     const t = Date.parse(at)
