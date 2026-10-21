@@ -4,10 +4,6 @@
 // says what the hold-up is: Google not having the night yet means the phone has
 // not synced it, which only opening Google Health (or the band app) fixes.
 import { useEffect, useState } from 'react'
-import { POKEDEX_URL } from './game'
-
-/** Until Life OS's own copy of the bridge has its Google settings, the Pokedex's copy answers (bridge/README.md). */
-const CHECK_BASE = POKEDEX_URL
 
 export type CheckState = 'measured' | 'scoring' | 'not-synced' | 'error'
 export interface CheckAnswer {
@@ -30,7 +26,7 @@ export function useHealthCheck(active: boolean): CheckAnswer | null {
     const ask = async () => {
       if (document.visibilityState === 'hidden') return
       try {
-        const res = await fetch(`${CHECK_BASE}/api/health-check`, { cache: 'no-store', signal: AbortSignal.timeout(30_000) })
+        const res = await fetch('/api/health-check', { cache: 'no-store', signal: AbortSignal.timeout(30_000) })
         if (!res.ok) return
         const a = (await res.json()) as CheckAnswer
         if (!gone && a && typeof a.state === 'string') setAnswer(a)
