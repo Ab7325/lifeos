@@ -447,43 +447,27 @@ body {
 .dex-card.aura-mega { box-shadow: 6px 6px 0 0 var(--color-neo-black), inset 0 0 0 2px #7fe3ff, inset 0 0 40px rgba(127, 227, 255, 0.25); }
 .dex-card.aura-gmax { box-shadow: 6px 6px 0 0 var(--color-neo-black), inset 0 0 0 2px #e0559a, inset 0 0 40px rgba(224, 85, 154, 0.25); }
 .dex-pix { image-rendering: pixelated; flex: none; }
+/* lean: sprite on the left, XP bar and the week's pace on the right */
+.dex-card.is-lean { grid-template-columns: auto 1fr; align-items: center; gap: 4px 14px; padding: 10px 16px 10px 10px; }
+.dex-card.is-lean .dex-hero { width: 76px; height: 76px; }
+.dex-lean-body { display: grid; gap: 10px; min-width: 0; }
+.dex-lean-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.dex-lean-row .dex-xp { flex: 1; }
+.dex-mult.is-hot { color: var(--dex-gold); }
 
-.dex-top { display: flex; align-items: center; gap: 12px; }
 /* the partner stands on a lit plinth, no frame */
 .dex-hero { position: relative; flex: none; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 50% 62%, rgba(255, 255, 255, 0.12) 0 38%, transparent 62%); }
 .dex-hero::after { content: ''; position: absolute; left: 18%; right: 18%; bottom: 8px; height: 10px; border-radius: 50%; background: rgba(0, 0, 0, 0.45); }
 .dex-hero .partner-sprite { position: relative; z-index: 1; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3)); transition: transform 0.25s cubic-bezier(0.2, 1.6, 0.4, 1); }
 .dex-hero:hover .partner-sprite, .dex-hero:active .partner-sprite { transform: translateY(-4px) scale(1.06); }
-.dex-name-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
-.dex-name { font-family: 'Lilita One', sans-serif; font-size: 24px; line-height: 1.05; color: #fff; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45); }
 .dex-lv { font-family: 'Lilita One', sans-serif; font-size: 16px; color: var(--dex-gold); }
-.dex-chip { align-self: center; font-family: 'Lilita One', sans-serif; font-size: 12px; line-height: 1; padding: 3px 7px 4px; border-radius: 999px; color: #1a1200; background: var(--dex-gold); }
-.dex-chip.is-mega { background: #7fe3ff; }
-.dex-chip.is-gmax { background: #e0559a; color: #fff; }
-.dex-say { margin: 3px 0 7px; font-family: 'Lilita One', sans-serif; font-size: 16px; line-height: 1.2; color: var(--dex-text); }
-.dex-say em { font-style: normal; color: var(--dex-gold); }
 .dex-xp { display: flex; height: 12px; background: var(--dex-well); border-radius: 99px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--dex-hair-hi); }
 .dex-xp i { display: block; height: 100%; flex: none; }
 .dex-xp .bar-base { background: linear-gradient(#6fb6ff, #2f7fd0); }
 /* today's XP: a different hue and a stripe, so it reads without relying on colour alone */
 .dex-xp .bar-today { background: linear-gradient(#ffe27a, #f5b800) ; background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgba(0, 0, 0, 0.22) 4px 6px), linear-gradient(#ffe27a, #f5b800); box-shadow: 0 0 10px var(--dex-gold-glow); }
-.dex-sub { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; margin-top: 5px; font-size: 12px; line-height: 1.3; color: var(--dex-text-2); }
-.dex-sub b { color: var(--dex-text); font-weight: 700; }
 
-/* coins, gems and what waits to be collected: small pills on a well */
-.dex-wallet { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.dex-pill { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px 0 6px; border-radius: 999px; background: var(--dex-well); box-shadow: inset 0 0 0 1px var(--dex-hair); font-family: 'Lilita One', sans-serif; font-size: 15px; }
-.dex-pill b { font-family: 'Lilita One', sans-serif; font-weight: 400; color: #fff; }
-.dex-pill small { font-size: 12px; color: var(--dex-gold); }
-.dex-collect { margin-left: auto; display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 999px; font-family: 'Lilita One', sans-serif; font-size: 14px; text-decoration: none; color: #1a1200; background: radial-gradient(circle at 50% 30%, #ffe27a, #f5b800); box-shadow: 0 0 16px var(--dex-gold-glow), 0 3px 0 rgba(0, 0, 0, 0.4); }
-.dex-collect.is-empty { color: var(--dex-text-3); background: none; box-shadow: none; font-size: 13px; padding: 0 2px; animation: none; }
-
-/* the pace: the week's momentum as seven dots and today */
-.dex-pace { display: flex; align-items: stretch; padding: 10px 0; border-top: 1px solid var(--dex-hair); border-bottom: 1px solid var(--dex-hair); }
-.dex-pace-cell { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0 4px; }
-.dex-pace-cell:first-child { flex: 1; }
-.dex-pace-cell + .dex-pace-cell { padding-left: 12px; margin-left: 8px; border-left: 1px solid var(--dex-hair); }
-.dex-label { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dex-text-3); }
+/* the week's momentum as seven dots and today */
 .dex-week { display: flex; align-items: center; gap: 5px; }
 .dex-week i { width: 11px; height: 11px; border-radius: 50%; background: var(--dex-well); box-shadow: inset 0 0 0 1px var(--dex-hair-hi); }
 .dex-week i.on { background: var(--dex-gold); box-shadow: 0 0 8px var(--dex-gold-glow); }
@@ -492,21 +476,7 @@ body {
 .dex-week i.now { width: 15px; height: 15px; margin-left: 3px; box-shadow: inset 0 0 0 2px #fff; }
 .dex-week i.now.on { box-shadow: 0 0 0 2px #fff, 0 0 10px var(--dex-gold-glow); }
 .dex-mult { margin-left: auto; font-family: 'Lilita One', sans-serif; font-weight: 400; font-size: 20px; color: #fff; }
-.dex-pace .flame { margin-left: auto; font-family: 'Lilita One', sans-serif; font-size: 20px; }
-.dex-pace .flame b { font-weight: 400; color: var(--dex-gold); }
 
-/* what today wears down: the wild Pokemon, the leader, the boss */
-.dex-foes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-.dex-foe { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 10px 7px 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.045); box-shadow: inset 0 0 0 1px var(--dex-hair); }
-.dex-foe.is-boss { background: radial-gradient(160px 80px at 0 50%, rgba(255, 90, 100, 0.18), transparent 70%), rgba(255, 255, 255, 0.045); box-shadow: inset 0 0 0 1px rgba(255, 90, 100, 0.35); }
-.dex-foe-art { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--dex-well); }
-.dex-foe-art.is-badge { color: var(--dex-gold); font-size: 18px; }
-.dex-foe-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Lilita One', sans-serif; font-size: 14px; line-height: 1.2; color: var(--dex-text); }
-.dex-foe-line { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--dex-text-2); }
-.dex-hp { display: block; height: 6px; margin: 3px 0 2px; border-radius: 99px; background: var(--dex-well); overflow: hidden; }
-.dex-hp i { display: block; height: 100%; border-radius: inherit; background: #3fd07a; transition: width 0.7s cubic-bezier(0.16, 0.84, 0.3, 1); }
-.dex-hp.mid i { background: #f5c400; }
-.dex-hp.low i { background: #ee4b3e; }
 
 /* ════════════════════════════════════════════════════════════════════════
    A pillar no app feeds (LeetCode, and any pillar added later): an ink slab
