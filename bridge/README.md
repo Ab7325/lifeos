@@ -50,7 +50,7 @@ ghealth auth login --scopes cloud-platform
 ghealth webhooks subscribers update ...   (endpoint https://<life os>/api/health-webhook)
 ```
 
-Use the project number, not the project ID, in that config (with the ID the API answers 403). Revoke the `cloud-platform` grant at myaccount.google.com/permissions afterwards.
+Use the project number, not the project ID, in that config (with the ID the API answers 403). **Never revoke afterwards.** Both configs use the same OAuth client, and revoking any of its tokens (or removing the app at myaccount.google.com/permissions) revokes them all, the data sign-in included: on 21 Oct 2026 that silently cut the bridge off from Google. Just delete `~/.config/ghealth-webhooks/credentials.json` instead.
 
 ## "Is last night in yet?"
 
