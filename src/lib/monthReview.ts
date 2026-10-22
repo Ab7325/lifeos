@@ -26,6 +26,8 @@ export const isReviewed = (ticks: Ticks, ym: string): boolean =>
 export interface ReviewItem {
   ym: string
   done: boolean
+  /** when it was closed, for the card to step aside like a done habit */
+  at?: string
 }
 
 /**
@@ -41,7 +43,7 @@ export function reviewsToShow(ticks: Ticks, today: string): ReviewItem[] {
   for (let ym = FIRST_REVIEW_YM; ym <= latest; ym = shiftYm(ym, 1)) {
     const at = ticks[reviewDay(ym)]?.[REVIEW_ID]
     if (!at) out.push({ ym, done: false })
-    else if (dateISO(new Date(at)) === today) out.push({ ym, done: true })
+    else if (dateISO(new Date(at)) === today) out.push({ ym, done: true, at })
   }
   return out
 }

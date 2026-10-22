@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { loadTicks, saveTicks, type Ticks } from './lib/store'
 import { useToday } from './lib/day'
+import { nextGymDay } from './arbor-core/schedule.ts'
 import {
   loadHealth,
   loadMetrics,
@@ -432,7 +433,7 @@ export default function App() {
             today={today}
             game={game}
             actions={actions}
-            linked={{ workout: workouts[today], arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today], check: sleepCheck } }}
+            linked={{ workout: workouts[today], gymNext: nextGymDay(workouts, today).name, arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today], check: sleepCheck } }}
             weekly={weekly}
           />
         )}

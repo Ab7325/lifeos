@@ -322,7 +322,7 @@ function ChecklistRow({
             name={habit.name}
             xp={xp}
             ticked={ticked}
-            today={today}
+            next={linked.gymNext}
             workout={linked.workout}
             locked={strongLinked}
             onToggle={() => actions.onToggle(habit.id)}

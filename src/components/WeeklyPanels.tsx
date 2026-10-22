@@ -4,7 +4,7 @@
 // Each wears its own look (a tear-off calendar page, a lavender sticker sheet)
 // so neither reads as an ordinary habit row. See lib/monthReview.ts and
 // lib/sundayTasks.ts for the rules behind them.
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { habitIdFor } from '../config/habits'
 import type { Ticks } from '../lib/store'
 import type { ReviewItem } from '../lib/monthReview'
@@ -29,6 +29,9 @@ const monthLabel = (ym: string): string => {
   return new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })
 }
 
+/** A closed review steps aside after this long, as a done habit does. */
+const DONE_HIDE_MS = 10_000
+
 /** Month-end reviews: a tear-off calendar page per month still owed. */
 export function MonthReviews({
   reviews,
@@ -39,10 +42,26 @@ export function MonthReviews({
   onToggle: (ym: string) => void
   onOpen: (ym: string) => void
 }) {
+  const [now, setNow] = useState(() => Date.now())
+  const [showDone, setShowDone] = useState(false)
+  const expired = (at?: string): boolean => {
+    const t = at ? Date.parse(at) : NaN
+    return Number.isNaN(t) || now - t >= DONE_HIDE_MS
+  }
+  // wake when the next closed card is due to step aside
+  useEffect(() => {
+    const due = reviews.filter((r) => r.done && !expired(r.at)).map((r) => Date.parse(r.at!) + DONE_HIDE_MS)
+    if (!due.length) return
+    const id = window.setTimeout(() => setNow(Date.now()), Math.min(...due) - Date.now() + 20)
+    return () => window.clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviews, now])
+  const hidden = reviews.filter((r) => r.done && expired(r.at)).length
+  const shown = showDone ? reviews : reviews.filter((r) => !(r.done && expired(r.at)))
   if (reviews.length === 0) return null
   return (
     <div className="space-y-3">
-      {reviews.map(({ ym, done }) => (
+      {shown.map(({ ym, done }) => (
         <div key={ym} className={`neo-card overflow-hidden ${done ? 'neo-card-green' : ''}`}>
           <div className="flex items-center justify-between border-b-[3px] border-black bg-neo-red px-3 py-1 font-display text-[11px] font-bold uppercase tracking-widest text-white">
             <span>◉ Month-end review</span>
@@ -88,6 +107,11 @@ export function MonthReviews({
           </div>
         </div>
       ))}
+      {hidden > 0 && (
+        <button type="button" onClick={() => setShowDone((v) => !v)} className="w-full text-center text-[11px] font-bold uppercase text-neo-gray-dark underline">
+          {showDone ? 'Hide closed review' : `${hidden} month closed · show`}
+        </button>
+      )}
     </div>
   )
 }

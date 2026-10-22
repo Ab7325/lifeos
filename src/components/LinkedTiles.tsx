@@ -10,7 +10,6 @@ import { practicedOn, valueOf, type ArborState, type DayPlan } from '../arbor-co
 import { G, renderPose } from '../arbor-core/pixel/figure.js'
 import { POSES } from '../arbor-core/pixel/poses.js'
 import { poseOf } from '../arbor-core/pixel/skillPoses.js'
-import { gymDayFor } from '../arbor-core/schedule.ts'
 import { SKILL_BY_ID } from '../arbor-core/skills.ts'
 import { ARBOR_URL, STRONG_URL } from '../lib/arborLink'
 import { WOODSHED_URL } from '../lib/guitarLink'
@@ -24,6 +23,8 @@ import type { CheckAnswer } from '../lib/healthCheck'
 
 export interface LinkedCtx {
   workout: DayWorkout | undefined
+  /** name of the session that is next in the split (follows the last workout, not the calendar) */
+  gymNext: string
   arbor: ArborState
   plan: DayPlan
   onSkill: (skillId: string, done: boolean, value?: number) => void
@@ -91,12 +92,12 @@ const Lock = ({ open }: { open: boolean }) => (
  * still ticks by hand so you are never locked out.
  */
 export function StrongTile({
-  name, xp, ticked, today, workout, locked, onToggle,
+  name, xp, ticked, next, workout, locked, onToggle,
 }: {
   name: string
   xp: number
   ticked: boolean
-  today: string
+  next: string
   workout: DayWorkout | undefined
   locked: boolean
   onToggle: () => void
@@ -106,7 +107,7 @@ export function StrongTile({
     ? s
       ? `Done · ${s.durationMin} min · ${s.totalSets} sets`
       : 'Done'
-    : `Today: ${gymDayFor(today).name}`
+    : `Next up: ${next}`
   if (!locked) {
     return (
       <div className="flex min-w-0 flex-1 items-center gap-3 py-2">
@@ -114,7 +115,7 @@ export function StrongTile({
           <Dumbbell />
           <span className="min-w-0 flex-1">
             <span className={`block truncate text-base font-bold ${ticked ? 'line-through opacity-80' : ''}`}>{name}</span>
-            <span className="block truncate text-[11px] font-bold opacity-75">{ticked ? 'Done' : `Today: ${gymDayFor(today).name}`}</span>
+            <span className="block truncate text-[11px] font-bold opacity-75">{ticked ? 'Done' : `Next up: ${next}`}</span>
           </span>
         </button>
         <a href={STRONG_URL} target="_blank" rel="noreferrer" className="shrink-0 border-2 border-black bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase no-underline" title="Open Strong">Strong ↗</a>
