@@ -40,8 +40,8 @@ export const useStrongLinked = (): boolean =>
 export const isLocked = (habitId: string): boolean =>
   habitId === ARBOR_HABIT || (habitId === GYM_HABIT && strongSeen)
 
-export const STRONG_URL = 'https://strong-five.vercel.app'
-export const ARBOR_URL = 'https://arbor-umber.vercel.app'
+export const STRONG_URL = import.meta.env.VITE_STRONG_URL || 'https://strong-five.vercel.app'
+export const ARBOR_URL = import.meta.env.VITE_ARBOR_URL || 'https://arbor-umber.vercel.app'
 
 const listeners = new Set<() => void>()
 const KEY = 'lifeos.arbor.v1'
