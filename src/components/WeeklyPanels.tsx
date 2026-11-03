@@ -9,8 +9,6 @@ import { habitIdFor } from '../config/habits'
 import type { Ticks } from '../lib/store'
 import type { ReviewItem } from '../lib/monthReview'
 import { sundayTickId, type SundayTask } from '../lib/sundayTasks'
-import { POKEDEX_URL } from '../lib/game'
-import { flyReward } from '../lib/flyReward'
 
 export interface WeeklyCtx {
   reviews: ReviewItem[]
@@ -68,30 +66,20 @@ export function MonthReviews({
             <span className="num">{monthLabel(ym)}</span>
           </div>
           <div className="flex items-center gap-3 px-3 pt-3">
-            {/* the shard it pays: just the picture, floating, with no box behind it */}
             <span aria-hidden className={`review-shard ${done ? 'is-done' : ''}`}>
-              {POKEDEX_URL ? (
-                <img src={`${POKEDEX_URL}/sprites/items/comet-shard.png`} alt="" width={44} height={44} style={{ imageRendering: 'pixelated' }} />
-              ) : (
-                <span className="text-3xl">◆</span>
-              )}
+              <span className="text-3xl">🗓</span>
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-lg font-bold leading-tight">{done ? `${monthLabel(ym)} is closed` : `Review ${monthLabel(ym)}`}</span>
               <span className="mt-0.5 block text-[12px] font-bold leading-snug text-black/60">
-                {done ? 'A Comet Shard is waiting in the Pokedex.' : 'Look over the graph, then close the month. It pays a Comet Shard and stays here until you do.'}
+                {done ? 'Reviewed. On to the next one.' : 'Look over the graph and your tasks, then close the month. It stays here until you do.'}
               </span>
             </span>
           </div>
           <div className="flex gap-2 p-3">
             <button
               type="button"
-              onClick={(e) => {
-                const el = e.currentTarget
-                onToggle(ym)
-                // the shard it pays goes to where rewards wait; the Pokedex collects it
-                if (!done) window.setTimeout(() => flyReward(el, '+1 Comet Shard', document.querySelector('[data-reward-target="collect"]') ? '[data-reward-target="collect"]' : undefined), 260)
-              }}
+              onClick={() => onToggle(ym)}
               aria-pressed={done}
               className={`neo-button flex-1 px-4 py-2.5 text-base font-bold ${done ? '' : 'neo-card-yellow'}`}
             >

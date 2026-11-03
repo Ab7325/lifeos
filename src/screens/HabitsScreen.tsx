@@ -7,13 +7,12 @@
 // coming back.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, Reorder, motion, useDragControls } from 'framer-motion'
-import { flyReward } from '../lib/flyReward'
 import * as kit from '../ui-kit/motion.js'
-import { TIERS, TIER_XP, domainOf, type Habit, type Tier } from '../config/habits'
+import { TIERS, domainOf, type Habit, type Tier } from '../config/habits'
 import { dateISO, streakFor, type Ticks } from '../lib/store'
-import { PartnerStrip } from '../components/PartnerStrip'
-import { nameOf, type Game } from '../game-core/fold.ts'
-import { SLEEP_HABIT, TAGS, tierXp, type Tag } from '../game-core/rules.ts'
+import { TaskPanel, type TaskActions } from '../components/TaskPanel'
+import type { Task } from '../lib/tasks'
+import { SLEEP_HABIT, TAGS, type Tag } from '../game-core/rules.ts'
 import { ArborHead, ArborSkills, GuitarHead, GuitarItems, GuitarTile, PillarTile, SleepTile, StrongTile, type LinkedCtx } from '../components/LinkedTiles'
 import { MonthReviews, SundayPanel, type WeeklyCtx } from '../components/WeeklyPanels'
 import { linkOf, useStrongLinked } from '../lib/arborLink'
@@ -82,7 +81,7 @@ function TierPicker({ value, onChange }: { value: Tier; onChange: (t: Tier) => v
             t === value ? 'neo-card-yellow' : 'bg-white'
           }`}
         >
-          {t} · {TIER_XP[t]}
+          {t}
         </button>
       ))}
     </div>
@@ -91,7 +90,7 @@ function TierPicker({ value, onChange }: { value: Tier; onChange: (t: Tier) => v
 
 const DOMAIN_NAME: Record<Tag, string> = { code: 'Code', fitness: 'Gym', guitar: 'Guitar', arbor: 'Arbor', sleep: 'Sleep', routine: 'Chore' }
 
-/** What kind of work a habit is, for the game: which gym leaders it hits hardest, which way a partner leans. */
+/** What kind of work a habit is: it sets a pillar's colour. */
 function DomainPicker({ value, onChange }: { value: Tag; onChange: (t: Tag) => void }) {
   return (
     <div className="flex flex-wrap gap-1" role="group" aria-label="Kind of work">
@@ -174,9 +173,7 @@ function RowEditor({
         <TierPicker value={habit.tier} onChange={(tier) => onEdit(habit.id, { tier })} />
         <DomainPicker value={domainOf(habit)} onChange={(domain) => onEdit(habit.id, { domain })} />
         <p className="text-[11px] font-medium opacity-60">
-          {habit.tier === 'pillar' && domainOf(habit) === 'routine'
-            ? 'A pillar counted as a chore: pick what kind of work it is, so it hits the right gym leaders.'
-            : 'Tier and kind change from tomorrow: today’s list is already set.'}
+          A pillar wears the colour of its kind of work.
         </p>
         <div className="flex flex-wrap items-center gap-2 border-t-2 border-black/10 pt-2">
           <button
@@ -253,18 +250,15 @@ function ChecklistRow({
 }) {
   const controls = useDragControls()
   const ticked = Boolean(ticks[today]?.[habit.id])
-  // a tick lands with a flash on the row and the XP stamped in (and not on load, or when it is un-ticked)
+  // a tick lands with a flash on the row (and not on load, or when it is un-ticked)
   const rowEl = useRef<HTMLDivElement>(null)
-  const xpEl = useRef<HTMLSpanElement>(null)
   const wasTicked = useRef(ticked)
   useEffect(() => {
     if (ticked && !wasTicked.current && rowEl.current && !kit.config.reduced) {
       void kit.flash(rowEl.current, '#ffffff', { dur: 300, peak: 0.55 })
-      if (xpEl.current) void kit.motion.stampIn(xpEl.current, { from: 1.5, flashColor: '#fff' })
     }
     wasTicked.current = ticked
   }, [ticked])
-  const xp = tierXp(habit.tier)
   // Linked habits are fed by Strong / Arbor and wear that app's look.
   // once the band is in use the Sleep row shows the night, or says it is waiting for it
   // Sleep is the band's (version 13): it always wears the night-sky tile and is never ticked by hand
@@ -291,7 +285,7 @@ function ChecklistRow({
       // row whenever its editor panel opens.
       layout="position"
       data-habit-row={habit.id}
-      // leaving after its 10 seconds: shrinks away while its XP flies to the bar
+      // leaving after its 10 seconds: shrinks away
       exit={{ opacity: 0, scale: 0.9, height: 0, marginTop: 0, transition: { duration: 0.28 } }}
       className="list-none"
       // Springy neighbours: rows shove each other aside while you drag.
@@ -320,7 +314,6 @@ function ChecklistRow({
         {link === 'strong' ? (
           <StrongTile
             name={habit.name}
-            xp={xp}
             ticked={ticked}
             next={linked.gymNext}
             workout={linked.workout}
@@ -330,7 +323,6 @@ function ChecklistRow({
         ) : link === 'arbor' ? (
           <ArborHead
             name={habit.name}
-            xp={xp}
             ticked={ticked}
             done={practised}
             total={planned.length}
@@ -338,13 +330,12 @@ function ChecklistRow({
             onToggle={() => setSkillsOpen(!showSkills)}
           />
         ) : link === 'vitals' ? (
-          <SleepTile name={habit.name} state={linked.sleep.state} night={linked.sleep.night} ticked={ticked} selfXp={TIER_XP.core} onToggle={() => actions.onToggle(habit.id)} check={linked.sleep.check} />
+          <SleepTile name={habit.name} state={linked.sleep.state} night={linked.sleep.night} ticked={ticked} onToggle={() => actions.onToggle(habit.id)} check={linked.sleep.check} />
         ) : link === 'woodshed' && WOODSHED_URL ? (
-          <GuitarTile name={habit.name} xp={xp} ticked={ticked} done={played} total={session.length} />
+          <GuitarTile name={habit.name} ticked={ticked} done={played} total={session.length} />
         ) : link === 'woodshed' ? (
           <GuitarHead
             name={habit.name}
-            xp={xp}
             ticked={ticked}
             done={played}
             total={session.length}
@@ -352,7 +343,7 @@ function ChecklistRow({
             onToggle={() => (session.length > 0 ? setSkillsOpen(!showSession) : actions.onToggle(habit.id))}
           />
         ) : pillar ? (
-          <PillarTile name={habit.name} emoji={habit.emoji} xp={xp} ticked={ticked} run={run} onToggle={() => actions.onToggle(habit.id)} xpRef={xpEl} />
+          <PillarTile name={habit.name} emoji={habit.emoji} ticked={ticked} run={run} onToggle={() => actions.onToggle(habit.id)} />
         ) : (
         <div
           role="button"
@@ -379,14 +370,6 @@ function ChecklistRow({
             }`}
           >
             {habit.name}
-          </span>
-          <span
-            ref={xpEl}
-            className={`num relative shrink-0 text-base font-bold ${
-              ticked ? 'text-black' : 'text-neo-gray-dark'
-            }`}
-          >
-            {ticked ? `+${xp}` : xp}
           </span>
         </div>
         )}
@@ -485,7 +468,7 @@ function ShelfRow({
           <span className="text-lg leading-none grayscale">{habit.emoji}</span>
           <span className="flex-1 truncate text-sm font-bold text-neo-black">{habit.name}</span>
           <span className="num shrink-0 text-[10px] font-bold text-neo-gray-dark">
-            {TIER_XP[habit.tier]} XP · {tickCount}✓
+            {habit.tier} · {tickCount}✓
           </span>
           {!picking && (
             <span className="shrink-0 border-2 border-black bg-white px-1.5 text-[10px] font-bold">
@@ -599,10 +582,10 @@ export function HabitsScreen({
   shelf,
   ticks,
   today,
-  game,
   actions,
   linked,
   weekly,
+  tasks,
 }: {
   /** whole registry, in order */
   habits: Habit[]
@@ -610,11 +593,12 @@ export function HabitsScreen({
   shelf: Habit[]
   ticks: Ticks
   today: string
-  game: Game
   actions: HabitActions
   linked: LinkedCtx
   /** month-end review + Sunday reset — the not-every-day blocks */
   weekly: WeeklyCtx
+  /** one-off tasks: Today's list and the dump — not habits, not counted in them */
+  tasks: { list: Task[]; actions: TaskActions }
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
   const [shelfOpen, setShelfOpen] = useState(false)
@@ -647,24 +631,11 @@ export function HabitsScreen({
       if (t > Date.now() && t < soonest) soonest = t
     }
     if (soonest === Infinity) return
-    const id = window.setTimeout(() => {
-      // whatever expires now flies its XP to the partner's bar as the row leaves
-      if (!showAll) {
-        const t0 = Date.now() + 25
-        let n = 0
-        for (const h of live) {
-          const at = todayRaw?.[h.id]
-          if (!at || Date.parse(at) + DONE_HIDE_MS > t0) continue
-          const row = document.querySelector(`[data-habit-row="${CSS.escape(h.id)}"]`)
-          if (row) flyReward(row, `+${tierXp(h.tier)}`, undefined, n++ * 180) // several leave one after another, not on top of each other
-        }
-      }
-      setNow(Date.now())
-    }, soonest - Date.now() + 20)
+    const id = window.setTimeout(() => setNow(Date.now()), soonest - Date.now() + 20)
     return () => window.clearTimeout(id)
     // `now` re-arms the timer for the next tick in line once one has expired;
     // without it only the first tick ever disappeared.
-  }, [todayRaw, now, live, showAll])
+  }, [todayRaw, now])
   // a tick older than DONE_HIDE_MS (or one with no usable time) is done and out of the way
   const isHidden = (id: string): boolean => {
     // a measured night is logged whatever its score: a low one is not ticked, but the row is still done
@@ -698,8 +669,6 @@ export function HabitsScreen({
 
   return (
     <div className="space-y-4">
-      <PartnerStrip game={game} />
-
       <MonthReviews
         reviews={weekly.reviews}
         onToggle={weekly.onToggleReview}
@@ -744,7 +713,7 @@ export function HabitsScreen({
             <p className="day-caption">
               {doneCount === live.length
                 ? 'Perfect day. Everything on the list is done.'
-                : `${live.length - doneCount} to a perfect day${game.wild && !game.wild.caught ? `, which catches the wild ${nameOf(game.wild.form)}` : ''} · ${game.today.pillars}/${game.today.pillarTotal} pillars`}
+                : `${live.length - doneCount} to a perfect day`}
             </p>
           </>
         )}
@@ -796,6 +765,8 @@ export function HabitsScreen({
           Hide done ones
         </button>
       )}
+
+      <TaskPanel tasks={tasks.list} today={today} actions={tasks.actions} />
 
       <SundayPanel
         tasks={weekly.sunday.tasks}

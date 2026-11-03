@@ -21,6 +21,7 @@ import { applyGameEvents } from './gameLink'
 import { currentDay } from './day'
 import { inOrder } from '../game-core/order.ts'
 import { SEED_AT, applySundayList, getSundayList, type SundayTask } from './sundayTasks'
+import { applyTask } from './tasks'
 
 /** The sleep habit Vitals can tick, and how early "on time" is (the habit says 10; half an hour of grace). */
 const SLEEP_HABIT = 'sleep-before-10'
@@ -39,6 +40,8 @@ export type EventType =
   | 'month'
   // the Sunday reset task list (the ticks themselves are plain `tick` events)
   | 'sunday'
+  // one task (dump / Today / done), the whole task each time, LWW per task (lib/tasks.ts)
+  | 'task'
   // written by Arbor / Strong / the Arbor block here; folded by lib/arborLink
   | 'skill'
   | 'plan'
@@ -259,6 +262,14 @@ function applyEvent(ev: LifeEvent, s: CloudSetters): void {
       try {
         const tasks = JSON.parse(String(p.tasks)) as SundayTask[]
         if (Array.isArray(tasks)) applySundayList({ tasks, at: ev.at })
+      } catch {
+        /* malformed payload — ignore */
+      }
+      break
+    case 'task':
+      // Tasks live in their own external store — LWW per task by its own `at`
+      try {
+        applyTask(JSON.parse(String(p.task)))
       } catch {
         /* malformed payload — ignore */
       }

@@ -3,7 +3,7 @@
 
 **Live**: React + Supabase (TypeScript) · installable as a PWA
 
-**Status (as of 2026-09-07)**: v2.1. LifeOS is now purely a habit tracker with 2 tabs (Daily · Monthly). Everything about a habit — adding, reordering, renaming, switching on/off, deleting — happens on the Daily tab; the separate Library tab is gone. Finished months are sealed and immutable, so habits can be deleted for good without losing history. Vault write-back was deliberately removed in v2.0 and this app no longer writes to or reads from any notes vault. Offline-first, append-only event log, and PWA install all still hold.
+**Status (as of 2026-11-04)**: v2.2. LifeOS is a habit tracker with one-off tasks alongside, in 2 tabs (Daily · Monthly). Everything about a habit — adding, reordering, renaming, switching on/off, deleting — happens on the Daily tab; the separate Library tab is gone. Finished months are sealed and immutable, so habits can be deleted for good without losing history. Vault write-back was deliberately removed in v2.0 and this app no longer writes to or reads from any notes vault. Offline-first, append-only event log, and PWA install all still hold.
 
 LifeOS is a personal web app (built by Rishabh, for Rishabh) that acts like a single home screen for the day's habits, instead of juggling apps.
 
@@ -47,11 +47,19 @@ Two things that are not daily habits live on the Daily screen. Neither pays XP o
 - **Sunday reset** is its own panel (lavender, dashed cut-line) with its own list of one-off tasks — cut nails, face pack, clean the room, watch a film. On Sundays it is a checklist that starts clear each week. Monday to Saturday the tasks are hidden; only a folded "Sunday reset" bar remains, and opening it lets you add, rename, reorder and delete tasks. The list syncs between devices (`sunday` events); each tick is an ordinary `tick` event with the id `sun:<task>`.
 - **Month-end review** appears at the top of Today on the last day of every month and stays there, month after month, until you tap it. Its "Graph" button jumps to that month on the Monthly tab. A review is a `tick` with the id `month-review`, filed under the first day of the month it closes. The first month that can owe a review is September 2026 (`FIRST_REVIEW_YM` in `src/lib/monthReview.ts`).
 
-## The game
+## Tasks
 
-Every tick feeds one partner that levels up and evolves; a perfect day catches a new one. The card at the top of the checklist shows it in the Pokedex's own night-screen look: the partner and today's XP, coins, gems and what waits to be collected, the week's momentum as seven dots, and the wild Pokemon, the gym leader and the boss with their HP. The collection lives on the separate Pokedex site. The three pillar habits (LeetCode, Gym, Woodshed) carry most of the XP; everything else pays a little.
+One-off things to get done live next to the habits but are never counted with them: no XP, no effect on the day's habit count, the Monthly habit graph or the sealed months.
 
-Nothing about the game is stored: it is recomputed from the habits and ticks by `src/game-core/`, which is copied from the pokedex repo (`npm run core` there). Do not edit it here. Sprites are not in this repo; they are loaded from the Pokedex site (`VITE_POKEDEX_URL`).
+- **Dump**: one box under the checklist. Type a line and press Enter and it lands in the dump; paste several lines and you get several tasks. A `#word` anywhere in the line is an optional tag, and the dump can be filtered by tag.
+- **Today**: "＋ Today" (or "↑ Today" on a dump row) puts a task on today's list. Tap it when done. An unfinished task simply stays on Today the next day with its age shown (`3d`); it is never a miss. ⋯ sends it back to the dump, edits it or deletes it.
+- **Review**: the Monthly tab has a Tasks section: tasks done that month (and the change from the month before), average days from Today to done, a bar per day (tap one for that day's list), and the dump tasks untouched for 14+ days, each with Keep / Drop.
+
+Each task syncs as its own `task` event (last write wins per task), so editing different tasks on the phone and the PC at once never clashes. Rules are in `src/lib/tasks.ts`.
+
+## No game on screen
+
+The Pokedex partner card, XP numbers and rewards are gone from this app (v2.2). `src/game-core/` is still here because the waking day and the Sleep rules come from it, and the app still writes the same tick and `day_list` events, so the Pokedex site keeps working off the ledger if you open it.
 
 How the whole system fits together, and why, is in [docs/GUIDE.md](docs/GUIDE.md).
 

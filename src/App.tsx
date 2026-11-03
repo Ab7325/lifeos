@@ -43,13 +43,13 @@ import { tempoFor } from './woodshed-core/coach.ts'
 import { ITEM_BY_ID } from './woodshed-core/course.ts'
 import { statsOf, type Feel } from './woodshed-core/model.ts'
 import { SKILL_BY_ID } from './arbor-core/skills.ts'
-import { useGame } from './lib/game'
 import { applyGameEvents, sleepMeasured, sleepState, useGameLink } from './lib/gameLink'
 import { useHealthCheck } from './lib/healthCheck'
 import { listAdds } from './game-core/events.ts'
 import { SLEEP_DONE, SLEEP_HABIT, V13_START } from './game-core/rules.ts'
 import { DAY_START_EVENT, clockOf } from './game-core/day.ts'
-import { Moments } from './components/PartnerStrip'
+import { addTasks, deleteTask, finishTask, getTasks, planTask, renameTask, reopenTask, useTasks, type Task } from './lib/tasks'
+import type { TaskActions } from './components/TaskPanel'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('daily')
@@ -262,7 +262,6 @@ export default function App() {
   const link = useGameLink()
   // while Sleep waits for today's reading, ask whether Google has the night (and fetch it if it does)
   const sleepCheck = useHealthCheck(sleepState(link, today) === 'waiting')
-  const game = useGame(habits, ticks, arbor, shed, link, today)
 
   // Record today's habit list, with each habit's tier and domain, so editing
   // or deleting a habit cannot change what a day was. From rules version 4 the
@@ -364,6 +363,28 @@ export default function App() {
     sunday: { tasks: sundayTasks, isSunday: isSunday(today), onChange: saveSundayTasks },
   }
 
+  // ── tasks: the dump, Today's tasks, done (lib/tasks.ts) ──
+  const tasks = useTasks()
+  const sendTask = (t: Task | null) => {
+    if (t) cloud.emit('task', { task: JSON.stringify(t) }, t.doneDay ?? t.today ?? today)
+  }
+  const taskActions: TaskActions = {
+    onAdd: (text, toToday) => addTasks(text, toToday ? today : null).forEach(sendTask),
+    onToggleDone: (id) => {
+      const t = getTasks().find((x) => x.id === id)
+      if (!t) return
+      sendTask(t.doneAt ? reopenTask(id) : finishTask(id, today))
+      try {
+        navigator.vibrate?.(t.doneAt ? 8 : [14, 40, 22])
+      } catch {
+        /* no vibration here */
+      }
+    },
+    onPlan: (id, toToday) => sendTask(planTask(id, toToday ? today : null)),
+    onRename: (id, text) => sendTask(renameTask(id, text)),
+    onDelete: (id) => sendTask(deleteTask(id)),
+  }
+
   const actions: HabitActions = {
     onToggle: toggle,
     onToggleLive: (habitId, isOn) => pushConfig(configWithLive(habitId, isOn, today)),
@@ -431,21 +452,19 @@ export default function App() {
             shelf={shelf}
             ticks={ticks}
             today={today}
-            game={game}
             actions={actions}
+            tasks={{ list: tasks, actions: taskActions }}
             linked={{ workout: workouts[today], gymNext: nextGymDay(workouts, today).name, arbor, plan, onSkill, guitar: { shed, session, onLog: onGuitar }, sleep: { state: sleepState(link, today), night: link.nights[today], check: sleepCheck } }}
             weekly={weekly}
           />
         )}
         {tab === 'monthly' && (
-          <MonthView habits={habits} ticks={ticks} today={today} initialYm={monthFocus ?? undefined} nights={link.nights} />
+          <MonthView habits={habits} ticks={ticks} today={today} initialYm={monthFocus ?? undefined} nights={link.nights} tasks={tasks} onTask={sendTask} />
         )}
       </motion.main>
 
-      <Moments game={game} today={today} ready={settled} />
-
       <footer className="hud-label mt-8 border-none text-center !text-[10px] !text-neo-gray-dark">
-        v2.1 · habit tracker ·{' '}
+        v2.2 · habits + tasks ·{' '}
         {cloud.status === 'live' && '☁️ cloud sync live'}
         {cloud.status === 'connecting' && '☁️ connecting…'}
         {cloud.status === 'error' && '☁️ sync error'}

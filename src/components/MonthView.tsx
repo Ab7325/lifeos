@@ -29,6 +29,8 @@ import {
   type MonthSnapshot,
   type SnapHabit,
 } from '../lib/monthSnapshot'
+import type { Task } from '../lib/tasks'
+import { TasksReview } from './TasksReview'
 
 const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
@@ -105,6 +107,8 @@ export function MonthView({
   today,
   initialYm,
   nights,
+  tasks = [],
+  onTask = () => {},
 }: {
   habits: Habit[]
   ticks: Ticks
@@ -113,6 +117,10 @@ export function MonthView({
   initialYm?: string
   /** the band's nights, so the Sleep row shows each night's score */
   nights?: Record<string, SleepNight>
+  /** one-off tasks, reviewed in their own section */
+  tasks?: Task[]
+  /** send a task changed here (stale review: keep / drop) to the ledger */
+  onTask?: (t: Task | null) => void
 }) {
   const [ym, setYm] = useState(() => initialYm ?? ymOf(today))
   const months = useMonths() // re-render when a month seals or one arrives from another device
@@ -477,6 +485,8 @@ export function MonthView({
           </div>
         </div>
       </section>
+
+      <TasksReview ym={ym} today={today} tasks={tasks} onTask={onTask} />
 
       {/* Habits, best kept first */}
       <details className="neo-card bg-white p-3" aria-label="Habits ranked">

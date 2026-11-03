@@ -92,10 +92,9 @@ const Lock = ({ open }: { open: boolean }) => (
  * still ticks by hand so you are never locked out.
  */
 export function StrongTile({
-  name, xp, ticked, next, workout, locked, onToggle,
+  name, ticked, next, workout, locked, onToggle,
 }: {
   name: string
-  xp: number
   ticked: boolean
   next: string
   workout: DayWorkout | undefined
@@ -119,7 +118,7 @@ export function StrongTile({
           </span>
         </button>
         <a href={STRONG_URL} target="_blank" rel="noreferrer" className="shrink-0 border-2 border-black bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase no-underline" title="Open Strong">Strong ↗</a>
-        <span className="num shrink-0 text-base font-bold">{ticked ? `+${xp}` : xp}</span>
+        <span className="num shrink-0 text-base font-bold">{ticked ? '✓' : ''}</span>
       </div>
     )
   }
@@ -137,13 +136,13 @@ export function StrongTile({
         <span className="block truncate text-[11px] font-bold opacity-75">{sub}{!ticked && ' ↗'}</span>
       </span>
       <Lock open={ticked} />
-      <span className="num shrink-0 text-base font-bold">{ticked ? `+${xp}` : xp}</span>
+      <span className="num shrink-0 text-base font-bold">{ticked ? '✓' : ''}</span>
     </a>
   )
 }
 
 /** Header of the Arbor row: tap to fold the skill list in or out. */
-export function ArborHead({ name, xp, ticked, done, total, open, onToggle }: { name: string; xp: number; ticked: boolean; done: number; total: number; open: boolean; onToggle: () => void }) {
+export function ArborHead({ name, ticked, done, total, open, onToggle }: { name: string; ticked: boolean; done: number; total: number; open: boolean; onToggle: () => void }) {
   return (
     <button type="button" onClick={onToggle} aria-expanded={open} className="flex min-w-0 flex-1 items-center gap-3 py-2 text-left">
       <span className="arbor-sprout" aria-hidden="true" />
@@ -154,7 +153,7 @@ export function ArborHead({ name, xp, ticked, done, total, open, onToggle }: { n
         </span>
       </span>
       <span className="arbor-count num shrink-0">{done}/{total}</span>
-      <span className="num shrink-0 text-base font-bold">{ticked ? `+${xp}` : xp}</span>
+      <span className="num shrink-0 text-base font-bold">{ticked ? '✓' : ''}</span>
     </button>
   )
 }
@@ -215,7 +214,7 @@ export function ArborSkills({ ctx, today }: { ctx: LinkedCtx; today: string }) {
  * The Woodshed row when Woodshed has a URL: like Gym, it opens the app, and the
  * habit ticks itself when the day's session is logged there. No panel here.
  */
-export function GuitarTile({ name, xp, ticked, done, total }: { name: string; xp: number; ticked: boolean; done: number; total: number }) {
+export function GuitarTile({ name, ticked, done, total }: { name: string; ticked: boolean; done: number; total: number }) {
   return (
     <a
       href={WOODSHED_URL}
@@ -232,13 +231,13 @@ export function GuitarTile({ name, xp, ticked, done, total }: { name: string; xp
         </span>
       </span>
       <span className="shed-count num shrink-0">{done}/{total}</span>
-      <span className="num shrink-0 text-base font-bold">{ticked ? `+${xp}` : xp}</span>
+      <span className="num shrink-0 text-base font-bold">{ticked ? '✓' : ''}</span>
     </a>
   )
 }
 
 /** Header of the Guitar row: tap to fold today's session in or out. */
-export function GuitarHead({ name, xp, ticked, done, total, open, onToggle }: { name: string; xp: number; ticked: boolean; done: number; total: number; open: boolean; onToggle: () => void }) {
+export function GuitarHead({ name, ticked, done, total, open, onToggle }: { name: string; ticked: boolean; done: number; total: number; open: boolean; onToggle: () => void }) {
   return (
     <button type="button" onClick={onToggle} aria-expanded={open} className="flex min-w-0 flex-1 items-center gap-3 py-2 text-left">
       <span className="shed-frets" aria-hidden="true" />
@@ -249,7 +248,7 @@ export function GuitarHead({ name, xp, ticked, done, total, open, onToggle }: { 
         </span>
       </span>
       <span className="shed-count num shrink-0">{done}/{total}</span>
-      <span className="num shrink-0 text-base font-bold">{ticked ? `+${xp}` : xp}</span>
+      <span className="num shrink-0 text-base font-bold">{ticked ? '✓' : ''}</span>
     </button>
   )
 }
@@ -314,14 +313,13 @@ const STAGES: [keyof SleepNight, string][] = [['deepMin', '#6b5be0'], ['remMin',
  * synced, or the night is being scored); from version 14 the night can be reported by hand, paid as a core habit with no Bells,
  * until the reading comes and replaces it. Left alone, a night with no reading is simply not part of the day.
  */
-export function SleepTile({ name, state, night, ticked, selfXp, onToggle, check }: { name: string; state: SleepState; night: SleepNight | undefined; ticked?: boolean; selfXp?: number; onToggle?: () => void; check?: CheckAnswer | null }) {
+export function SleepTile({ name, state, night, ticked, onToggle, check }: { name: string; state: SleepState; night: SleepNight | undefined; ticked?: boolean; onToggle?: () => void; check?: CheckAnswer | null }) {
   if (state === 'measured' && night) {
     const score = night.score ?? 0
-    const bells = score >= 90 ? 2 : score >= 80 ? 1 : 0
     const total = STAGES.reduce((n, [k]) => n + ((night[k] as number | undefined) ?? 0), 0)
     const r = 15, c = 2 * Math.PI * r
     return (
-      <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Measured by your band: the score is the pillar's XP; 80 or more fills it and pays a Bell, 90 two.">
+      <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Measured by your band: a score of 80 or more fills it.">
         <span className="sleep-ring" aria-label={`Sleep score ${score}`}>
           <svg viewBox="0 0 36 36" width="46" height="46" aria-hidden>
             <circle cx="18" cy="18" r={r} fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="4" />
@@ -342,7 +340,7 @@ export function SleepTile({ name, state, night, ticked, selfXp, onToggle, check 
         </span>
         <span className="flex shrink-0 flex-col items-end gap-0.5">
           <span className="num text-base font-bold">+{score}</span>
-          {bells > 0 && <span className="sleep-bells">{bells === 2 ? '🔔🔔' : '🔔'}</span>}
+
         </span>
       </div>
     )
@@ -352,14 +350,14 @@ export function SleepTile({ name, state, night, ticked, selfXp, onToggle, check 
       : check && check.state !== 'measured' ? check.message
         : 'Waiting for last night\'s reading · it fills when the band syncs'
   return (
-    <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Filled by your band's reading of the night. A night with no reading is never a miss; you can report it by hand for a core habit's XP.">
+    <div className="flex min-w-0 flex-1 items-center gap-3 py-2" title="Filled by your band's reading of the night. A night with no reading is never a miss; you can report it by hand.">
       <span className={`sleep-ring waiting ${check?.state === 'not-synced' ? 'nudge' : ''}`} aria-hidden><Moon /></span>
       <span className="min-w-0 flex-1">
         <span className="vit-title block truncate">{name}</span>
         <span className="block text-[11px] font-bold leading-tight opacity-80">{line}</span>
       </span>
       {state === 'waiting' && onToggle
-        ? <button type="button" className={`sleep-self num shrink-0 ${ticked ? 'on' : ''}`} aria-pressed={Boolean(ticked)} onClick={onToggle} title={ticked ? 'Take the hand report back' : `No reading yet: report the night yourself (+${selfXp ?? 30} XP, no Bells). The band's reading replaces it when it comes.`}>{ticked ? `✓ +${selfXp ?? 30}` : 'Slept?'}</button>
+        ? <button type="button" className={`sleep-self num shrink-0 ${ticked ? 'on' : ''}`} aria-pressed={Boolean(ticked)} onClick={onToggle} title={ticked ? 'Take the hand report back' : "No reading yet: report the night yourself. The band's reading replaces it when it comes."}>{ticked ? '✓' : 'Slept?'}</button>
         : <span className="num shrink-0 text-sm font-bold opacity-70">0 to 100</span>}
     </div>
   )
@@ -372,7 +370,7 @@ export function SleepTile({ name, state, night, ticked, selfXp, onToggle, check 
  * fills when it is done, and the line under the name is the run it is on. Being
  * built differently from an ordinary row is what says "pillar"; it needs no badge.
  */
-export function PillarTile({ name, emoji, xp, ticked, run, onToggle, xpRef }: { name: string; emoji: string; xp: number; ticked: boolean; run: number; onToggle: () => void; xpRef?: React.Ref<HTMLSpanElement> }) {
+export function PillarTile({ name, emoji, ticked, run, onToggle }: { name: string; emoji: string; ticked: boolean; run: number; onToggle: () => void }) {
   const line = ticked
     ? run > 1 ? `Done · ${run} days running` : 'Done · a run starts today'
     : run > 0 ? `${run}-day run · keep it going` : 'Start a run today'
@@ -383,7 +381,7 @@ export function PillarTile({ name, emoji, xp, ticked, run, onToggle, xpRef }: { 
         <span className="pillar-title block truncate">{name}</span>
         <span className="pillar-line block truncate">{run > 1 && <i className="pillar-run" aria-hidden />}{line}</span>
       </span>
-      <span ref={xpRef} className="pillar-xp num shrink-0">{ticked ? `+${xp}` : xp}</span>
+      <span className="pillar-xp num shrink-0">{ticked ? '✓' : ''}</span>
     </button>
   )
 }

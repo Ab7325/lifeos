@@ -602,3 +602,15 @@ body {
 .sleep-ring.waiting.nudge { animation: sleep-nudge 1.6s ease-in-out infinite; }
 @keyframes sleep-nudge { 50% { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { .sleep-ring.waiting.nudge { animation: none; } }
+
+/* ── Tasks (components/TaskPanel.tsx, MonthView TasksReview) ── */
+.task-panel { display: grid; gap: 10px; padding: 12px; border: 3px solid #000; background: #fff8d6; box-shadow: 4px 4px 0 #000; }
+.task-add { display: flex; gap: 8px; align-items: stretch; }
+.task-box { display: flex; height: 26px; width: 26px; flex-shrink: 0; align-items: center; justify-content: center; border: 2px solid #000; border-radius: 50%; background: #fff; font-size: 14px; font-weight: 800; }
+.task-box.is-done { background: var(--color-neo-yellow); }
+.task-tag { padding: 0 6px; font-size: 10px; font-weight: 800; text-transform: lowercase; border: 1.5px solid #000; background: #e8e0ff; }
+.task-age { flex-shrink: 0; padding: 0 5px; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #fff; background: var(--color-neo-orange); border: 1.5px solid #000; }
+.task-bars { display: flex; align-items: flex-end; gap: 2px; height: 72px; }
+.task-bars button { flex: 1; min-width: 0; background: var(--color-neo-yellow); border: 1.5px solid #000; border-bottom-width: 0; }
+.task-bars button.is-empty { background: transparent; border-color: transparent; border-bottom: 2px solid #0002; }
+.task-bars button.is-picked { background: var(--color-neo-blue); }
