@@ -1,7 +1,7 @@
 # LifeOS - a personal dashboard for daily life
 
 
-**Live**: https://redesign-life-os-ui.vercel.app · React + Supabase (TypeScript) · installable as a PWA
+**Live**: React + Supabase (TypeScript) · installable as a PWA
 
 **Status (as of 2026-09-07)**: v2.1. LifeOS is now purely a habit tracker with 2 tabs (Daily · Monthly). Everything about a habit — adding, reordering, renaming, switching on/off, deleting — happens on the Daily tab; the separate Library tab is gone. Finished months are sealed and immutable, so habits can be deleted for good without losing history. Vault write-back was deliberately removed in v2.0 and this app no longer writes to or reads from any notes vault. Offline-first, append-only event log, and PWA install all still hold.
 
